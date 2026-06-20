@@ -13,6 +13,7 @@
 | **[examples/momotaro-walkthrough/README.md](examples/momotaro-walkthrough/README.md)** | **入門チュートリアル**（桃太郎を空から登録する手順） |
 | [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | 要件定義・ドメインモデル |
 | [docs/COMMANDS.md](docs/COMMANDS.md) | CUI コマンド仕様 |
+| [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | **開発者向け**（構成・テスト・協業ガイド） |
 
 初心者はまず **桃太郎ウォークスルー** を上から順に試すのがおすすめです。
 
