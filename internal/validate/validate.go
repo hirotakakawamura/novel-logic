@@ -40,8 +40,8 @@ func globalIssues(d *project.Data) []Issue {
 	for _, msg := range project.DuplicateIssues(d) {
 		issues = append(issues, Issue{"duplicate", msg})
 	}
-	for _, msg := range project.BranchIssues(d) {
-		issues = append(issues, Issue{branchIssueCode(msg), msg})
+	for _, bi := range project.BranchIssues(d) {
+		issues = append(issues, Issue{bi.Code, bi.Message})
 	}
 	for _, msg := range project.NovelBodyIssues(d) {
 		issues = append(issues, Issue{"novel.missing_body", msg})
@@ -149,31 +149,6 @@ func branchScopedIssues(d *project.Data, branchID string) []Issue {
 	return issues
 }
 
-func branchIssueCode(msg string) string {
-	switch {
-	case contains(msg, "branch.isolated_state"):
-		return "branch.isolated_state"
-	case contains(msg, "merge.after_action"):
-		return "merge.after_action"
-	case contains(msg, "fork.exclusive"):
-		return "fork.exclusive"
-	case contains(msg, "merge ") && contains(msg, "to ") && contains(msg, "differs"):
-		return "merge.action_mismatch"
-	case contains(msg, "fork "):
-		return "fork.invalid"
-	case contains(msg, "unknown branch"):
-		return "branch.unknown"
-	case contains(msg, "body path"):
-		return "novel.branch_path"
-	default:
-		return "branch.invalid"
-	}
-}
-
-func contains(s, sub string) bool {
-	return strings.Contains(s, sub)
-}
-
 // Hints returns non-fatal alignment suggestions (Phase A vs Phase B).
 func Hints(d *project.Data) []Issue {
 	var hints []Issue
@@ -257,10 +232,11 @@ func checkActionRulesFor(rules []project.Rule, a project.Action) string {
 	return ""
 }
 
-func checkForbidState(d *project.Data, thing, pred string) string {
-	return checkForbidStateRules(d.Rules, thing, pred)
+func checkForbidState(d *project.Data, branch, thing, pred string) string {
+	return checkForbidStateRules(d.EffectiveRulesOnBranch(branch), thing, pred)
 }
 
 func checkActionRules(d *project.Data, a project.Action) string {
-	return checkActionRulesFor(d.Rules, a)
+	branch := project.NormalizeBranch(a.Branch)
+	return checkActionRulesFor(d.EffectiveRulesOnBranch(branch), a)
 }

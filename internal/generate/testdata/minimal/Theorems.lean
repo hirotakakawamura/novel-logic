@@ -29,7 +29,7 @@ theorem actions_in_scene_window_main :
   native_decide
 
 theorem no_forbidden_transitions_main :
-    allActionsRespectRules projectRules activeActions_main := by
+    allActionsRespectRules projectRules_main activeActions_main := by
   native_decide
 
 theorem fixed_facts_stable_main :

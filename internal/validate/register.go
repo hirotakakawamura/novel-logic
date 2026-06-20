@@ -25,9 +25,9 @@ func CheckActionRules(d *project.Data, a project.Action) error {
 	return nil
 }
 
-// CheckForbidState runs forbid-state for a proposed state fact.
-func CheckForbidState(d *project.Data, thing, pred string) error {
-	if msg := checkForbidState(d, thing, pred); msg != "" {
+// CheckForbidState runs forbid-state for a proposed state fact on branch.
+func CheckForbidState(d *project.Data, branch, thing, pred string) error {
+	if msg := checkForbidState(d, branch, thing, pred); msg != "" {
 		return fmt.Errorf("%s", msg)
 	}
 	return nil

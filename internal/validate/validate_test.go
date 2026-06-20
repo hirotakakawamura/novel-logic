@@ -1,11 +1,11 @@
 package validate
 
 import (
-	"os"
 	"path/filepath"
 	"testing"
 
 	"novel-logic/internal/project"
+	"novel-logic/internal/testfixture"
 )
 
 func TestRunMinimalProjectOK(t *testing.T) {
@@ -76,58 +76,5 @@ func TestWalkthroughProjectValidates(t *testing.T) {
 }
 
 func loadFixture(t *testing.T) *project.Data {
-	t.Helper()
-	dir := t.TempDir()
-	files := map[string]string{
-		project.FileProject: `title: fixture
-time_order: [t1, t2, t3]
-`,
-		project.FileThings: `- id: hero
-  tags: [character]
-  scopes: [plot]
-`,
-		project.FileTimes: `- id: t1
-- id: t2
-- id: t3
-`,
-		project.FileScenes: `- id: scene1
-  summary: one
-  time_start: t1
-  time_end: t3
-`,
-		project.FileBranches: `- id: main
-  label: main
-`,
-		project.FileForks:  "[]\n",
-		project.FileMerges: "[]\n",
-		project.FileFacts: `- id: fact1
-  kind: state
-  thing: hero
-  pred: start
-  scope: plot
-`,
-		project.FileActions: `- id: act1
-  thing: hero
-  from: start
-  to: mid
-  at: t2
-  scope: plot
-`,
-		project.FileRules:  "[]\n",
-		project.FileNovels: "[]\n",
-	}
-	for name, content := range files {
-		path := filepath.Join(dir, name)
-		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
-			t.Fatal(err)
-		}
-	}
-	d, err := project.Load(dir)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := d.AddBranch("branch_a", "alt", project.MainBranch, "", ""); err != nil {
-		t.Fatal(err)
-	}
-	return d
+	return testfixture.LoadValidate(t)
 }

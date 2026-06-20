@@ -328,30 +328,6 @@ func (d *Data) ActiveActions(branchID string) []Action {
 	return out
 }
 
-// ActiveFacts returns facts for branchID (branch field must match).
-func (d *Data) ActiveFacts(branchID string) []Fact {
-	branchID = NormalizeBranch(branchID)
-	var out []Fact
-	for _, f := range d.Facts {
-		if NormalizeBranch(f.Branch) == branchID {
-			out = append(out, f)
-		}
-	}
-	return out
-}
-
-// ActiveRules returns rules for branchID (branch field must match).
-func (d *Data) ActiveRules(branchID string) []Rule {
-	branchID = NormalizeBranch(branchID)
-	var out []Rule
-	for _, r := range d.Rules {
-		if NormalizeBranch(r.Branch) == branchID {
-			out = append(out, r)
-		}
-	}
-	return out
-}
-
 // AllBranchIDs returns every branch id including implicit main.
 func (d *Data) AllBranchIDs() []string {
 	ids := make([]string, 0, len(d.Branches))

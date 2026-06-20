@@ -127,20 +127,27 @@ func genRules(d *project.Data) string {
 	ns := namespace(d)
 	var b strings.Builder
 	fmt.Fprintf(&b, "import Core\nimport Project\n\nnamespace %s\n\nopen NovelLogic\n\n", ns)
-	fmt.Fprintf(&b, "def projectRules : Rules ThingId PredId := {\n")
-	fmt.Fprintf(&b, "  forbiddenStates := [\n")
-	for _, r := range d.Rules {
-		if r.Kind == project.RuleForbidState {
-			fmt.Fprintf(&b, "    (ThingId.%s, PredId.%s),\n", leanIdent(r.Thing), leanPred(r.Pred))
+	for _, bid := range branchIDs(d) {
+		ident := leanIdent(bid)
+		rules := d.EffectiveRulesOnBranch(bid)
+		fmt.Fprintf(&b, "def projectRules_%s : Rules ThingId PredId := {\n", ident)
+		fmt.Fprintf(&b, "  forbiddenStates := [\n")
+		for _, r := range rules {
+			if r.Kind == project.RuleForbidState {
+				fmt.Fprintf(&b, "    (ThingId.%s, PredId.%s),\n", leanIdent(r.Thing), leanPred(r.Pred))
+			}
 		}
-	}
-	fmt.Fprintf(&b, "  ],\n  forbiddenTransitions := [\n")
-	for _, r := range d.Rules {
-		if r.Kind == project.RuleForbidTransition {
-			fmt.Fprintf(&b, "    (PredId.%s, PredId.%s),\n", leanPred(r.From), leanPred(r.To))
+		fmt.Fprintf(&b, "  ],\n  forbiddenTransitions := [\n")
+		for _, r := range rules {
+			if r.Kind == project.RuleForbidTransition {
+				fmt.Fprintf(&b, "    (PredId.%s, PredId.%s),\n", leanPred(r.From), leanPred(r.To))
+			}
 		}
+		fmt.Fprintf(&b, "  ]\n}\n\n")
 	}
-	fmt.Fprintf(&b, "  ]\n}\n\nend %s\n", ns)
+	mainIdent := leanIdent(project.MainBranch)
+	fmt.Fprintf(&b, "abbrev projectRules : Rules ThingId PredId := projectRules_%s\n\n", mainIdent)
+	fmt.Fprintf(&b, "end %s\n", ns)
 	return b.String()
 }
 
@@ -184,7 +191,7 @@ func genTheorems(d *project.Data) string {
 		fmt.Fprintf(&b, "    allActionsInSceneWindows sceneWindows timeOrder activeActions_%s scopeToScene := by\n", ident)
 		fmt.Fprintf(&b, "  native_decide\n\n")
 		fmt.Fprintf(&b, "theorem no_forbidden_transitions_%s :\n", ident)
-		fmt.Fprintf(&b, "    allActionsRespectRules projectRules activeActions_%s := by\n", ident)
+		fmt.Fprintf(&b, "    allActionsRespectRules projectRules_%s activeActions_%s := by\n", ident, ident)
 		fmt.Fprintf(&b, "  native_decide\n\n")
 		fmt.Fprintf(&b, "theorem fixed_facts_stable_%s :\n", ident)
 		fmt.Fprintf(&b, "    fixedFactsStable allFixedFacts allStateDecls activeActions_%s timeOrder := by\n", ident)

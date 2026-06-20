@@ -117,7 +117,7 @@ func runTimeline(cmd *cobra.Command, args []string) error {
 	}
 	fmt.Println("time_order:")
 	for _, t := range d.Meta.TimeOrder {
-		markers := timelineMarkers(d, t)
+		markers := timelineMarkers(d, branch, t)
 		line := fmt.Sprintf("  %s", t)
 		if markers != "" {
 			line += "  " + markers
@@ -149,14 +149,14 @@ func runTimeline(cmd *cobra.Command, args []string) error {
 	if verbose {
 		fmt.Println()
 		fmt.Println("facts:")
-		for _, f := range d.Facts {
+		for _, f := range d.EffectiveFactsOnBranch(branch) {
 			fmt.Printf("  %s [%s] %s は %s (scope=%s)\n", f.ID, f.Kind, f.Thing, f.Pred, scopeOrPlot(f.Scope))
 		}
 	}
 	return nil
 }
 
-func timelineMarkers(d *project.Data, t string) string {
+func timelineMarkers(d *project.Data, branch, t string) string {
 	var parts []string
 	for _, s := range d.Scenes {
 		if s.TimeStart == t {
@@ -166,7 +166,7 @@ func timelineMarkers(d *project.Data, t string) string {
 			parts = append(parts, "scene:"+s.ID+" end")
 		}
 	}
-	for _, a := range d.Actions {
+	for _, a := range d.ActiveActions(branch) {
 		if a.At == t {
 			parts = append(parts, "action:"+a.ID)
 		}

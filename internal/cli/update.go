@@ -60,7 +60,7 @@ var factUpdateCmd = &cobra.Command{
 			return exitErr(1, err)
 		}
 		if kind == project.FactState {
-			if err := validate.CheckForbidState(d, thing, pred); err != nil {
+			if err := validate.CheckForbidState(d, project.NormalizeBranch(f.Branch), thing, pred); err != nil {
 				return exitErr(1, err)
 			}
 		}
@@ -115,7 +115,7 @@ var actionUpdateCmd = &cobra.Command{
 		if err := validate.CheckPredNotThingID(d, to); err != nil {
 			return exitErr(1, err)
 		}
-		updated := project.Action{Thing: thing, From: from, To: to, At: at, Scope: scope, Label: label}
+		updated := project.Action{Thing: thing, From: from, To: to, At: at, Scope: scope, Label: label, Branch: a.Branch}
 		if err := validate.CheckActionRules(d, updated); err != nil {
 			return exitErr(1, err)
 		}

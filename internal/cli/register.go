@@ -120,7 +120,7 @@ var factAddCmd = &cobra.Command{
 			return exitErr(1, err)
 		}
 		if kind == project.FactState {
-			if err := validate.CheckForbidState(d, thing, pred); err != nil {
+			if err := validate.CheckForbidState(d, project.NormalizeBranch(branch), thing, pred); err != nil {
 				return exitErr(1, err)
 			}
 		}
@@ -169,7 +169,7 @@ var actionAddCmd = &cobra.Command{
 		if err := validate.CheckPredNotThingID(d, to); err != nil {
 			return exitErr(1, err)
 		}
-		a := project.Action{Thing: thing, From: from, To: to, At: at, Scope: scope, Label: label}
+		a := project.Action{Thing: thing, From: from, To: to, At: at, Scope: scope, Label: label, Branch: branch}
 		if err := validate.CheckActionRules(d, a); err != nil {
 			return exitErr(1, err)
 		}

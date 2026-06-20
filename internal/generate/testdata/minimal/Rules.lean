@@ -5,11 +5,13 @@ namespace test
 
 open NovelLogic
 
-def projectRules : Rules ThingId PredId := {
+def projectRules_main : Rules ThingId PredId := {
   forbiddenStates := [
   ],
   forbiddenTransitions := [
   ]
 }
+
+abbrev projectRules : Rules ThingId PredId := projectRules_main
 
 end test

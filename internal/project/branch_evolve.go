@@ -104,8 +104,8 @@ func (d *Data) predIntroducedBranches(thing, pred string) []string {
 }
 
 // BranchIsolatedStateIssues detects actions referencing preds exclusive to other branches.
-func (d *Data) BranchIsolatedStateIssues() []string {
-	var issues []string
+func (d *Data) BranchIsolatedStateIssues() []BranchIssue {
+	var issues []BranchIssue
 	for _, branchID := range d.AllBranchIDs() {
 		lineage := map[string]bool{}
 		for _, b := range d.BranchLineage(branchID) {
@@ -130,10 +130,13 @@ func (d *Data) BranchIsolatedStateIssues() []string {
 				}
 			}
 			if exclusive {
-				issues = append(issues, fmt.Sprintf(
-					"branch.isolated_state: action %q on branch %q references from %q for %q introduced only on other branch(es) %v",
-					a.ID, branchID, a.From, a.Thing, intro,
-				))
+				issues = append(issues, BranchIssue{
+					Code: "branch.isolated_state",
+					Message: fmt.Sprintf(
+						"action %q on branch %q references from %q for %q introduced only on other branch(es) %v",
+						a.ID, branchID, a.From, a.Thing, intro,
+					),
+				})
 			}
 		}
 	}
