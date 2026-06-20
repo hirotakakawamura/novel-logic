@@ -134,6 +134,17 @@ func TestRunIssueCodes(t *testing.T) {
 			wantCode: "branch.unknown",
 		},
 		{
+			name: "novel_unknown_scene",
+			mutate: func(d *project.Data) {
+				d.Novels = append(d.Novels, project.NovelMeta{
+					SceneID: "ghost_scene", Branch: project.MainBranch,
+					TimeStart: "t1", TimeEnd: "t2",
+					BodyPath: project.DefaultNovelBodyPath("ghost_scene", project.MainBranch),
+				})
+			},
+			wantCode: "novel.unknown_scene",
+		},
+		{
 			name: "novel_missing_body",
 			mutate: func(d *project.Data) {
 				body := project.DefaultNovelBodyPath("scene1", project.MainBranch)
