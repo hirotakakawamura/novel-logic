@@ -292,6 +292,30 @@ novel-logic action add \
 
 ---
 
+## Step 6b: 分岐デモ（犬ルート `branch_dog`）
+
+本ウォークスルーには **t7 で犬だけを仲間にする分岐** が含まれます。
+
+| ファイル | 内容 |
+|----------|------|
+| `forks.yaml` | `fork_t7`（`main` @ t7） |
+| `branches.yaml` | `branch_dog`（`via_action: act_fork_dog`） |
+| `merges.yaml` | `merge_t11`（`branch_dog` と `main` を `鬼退治準備` へ合流） |
+| `novels/branch_dog/scene4.txt` | 犬ルート専用の scene4 本文 |
+
+```bash
+novel-logic branch list
+novel-logic fork show fork_t7
+novel-logic merge show merge_t11
+novel-logic timeline --branch main
+novel-logic timeline --branch branch_dog
+novel-logic validate --branch branch_dog
+```
+
+本線（`main`）は従来どおり三匹仲間 → 合流 → 鬼退治。`branch_dog` は犬のみ仲間にして t11 で本線に戻ります。
+
+---
+
 ## Step 7: novel（本文）を登録する
 
 Phase 0 では **1 scene × 1 branch に 1 本文**（`novels/main/<scene_id>.txt`）です。分岐ルートは `--branch` で別ディレクトリに置きます。

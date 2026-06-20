@@ -1,0 +1,9 @@
+- id: merge_t11
+  at: t11
+  scope: plot
+  into_branch: main
+  choices:
+    - branch: branch_dog
+      action: act_merge_dog
+    - branch: main
+      action: act_merge_main

@@ -18,6 +18,11 @@
   time_start: t7
   time_end: t11
   body_path: novels/main/scene4.txt
+- scene_id: scene4
+  branch: branch_dog
+  time_start: t7
+  time_end: t11
+  body_path: novels/branch_dog/scene4.txt
 - scene_id: scene5
   branch: main
   time_start: t11

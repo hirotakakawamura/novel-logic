@@ -502,11 +502,13 @@ novel-logic novel remove <scene_id>    # デフォルト --keep-body
 
 - スキーマ・参照 ID
 - time 順序・scene / novel 区間
-- rule / fact / action の抵触
+- rule / fact / action の抵触（**branch ごとの有効 action**）
+- fork / merge 整合、`branch.isolated_state`
 - tag 形式
 
 | フラグ | 説明 |
 |--------|------|
+| `--branch <id>` | 単一 branch のみ検証（省略時: 全 branch） |
 | `--scope <scope>` | 特定スコープのみ検証 |
 
 ---
@@ -537,6 +539,7 @@ validate → generate → lake build
 | フラグ | 説明 |
 |--------|------|
 | `--quick` | `validate` のみ（Stage 1） |
+| `--branch <id>` | 単一 branch のみ Stage 1 検証（省略時: 全 branch） |
 | `--no-generate` | 既存 `logic/` のまま Stage 2 のみ |
 | `-j` / `--jobs` | `lake build -j` に渡す |
 

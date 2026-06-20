@@ -32,6 +32,7 @@ inductive TimeId
   deriving DecidableEq, Repr
 
 inductive BranchId
+  | branch_dog
   | main
   deriving DecidableEq, Repr
 
@@ -50,11 +51,13 @@ inductive PredId
   | doubutsu
   | tabidachi
   | murazaiju
+  | pred_daf4895b
   | akachan
   | taijizumi
   | nora
   | seinen
   | onitaijizumi
+  | pred_fb795e08
   deriving DecidableEq, Repr
 
 inductive Scope

@@ -158,7 +158,7 @@ Phase 0 のルール:
 - 合流は **merge action** を各 from branch に登録し、**同じ `to` pred** へ遷移させる
 - merge 登録後、終了した子 branch への新規 action 登録は拒否
 
-**検証（Stage 1）**: `branch.unknown`, `fork.invalid`, `merge.action_mismatch`, `merge.after_action`, `novel.branch_path` 等。
+**検証（Stage 1）**: `branch.unknown`, `fork.invalid`, `fork.exclusive`, `merge.action_mismatch`, `merge.after_action`, `branch.isolated_state`, `novel.branch_path` 等。`validate` / `check` に `--branch <id>`（省略時は全 branch）。
 
 ### 3.8 time の扱い
 

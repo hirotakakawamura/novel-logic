@@ -28,7 +28,17 @@ func BranchIssues(d *Data) []string {
 		}
 	}
 
+	seenForkSlot := map[string]string{}
 	for _, fork := range d.Forks {
+		slot := NormalizeBranch(fork.ParentBranch) + "|" + fork.At
+		if prev, ok := seenForkSlot[slot]; ok {
+			issues = append(issues, fmt.Sprintf(
+				"fork.exclusive: fork %q and %q share parent %q at %q",
+				prev, fork.ID, fork.ParentBranch, fork.At,
+			))
+		} else {
+			seenForkSlot[slot] = fork.ID
+		}
 		if err := d.validateBranchRef(fork.ParentBranch); err != nil {
 			issues = append(issues, fmt.Sprintf("fork %q: %v", fork.ID, err))
 		}
@@ -103,6 +113,10 @@ func BranchIssues(d *Data) []string {
 			issues = append(issues, fmt.Sprintf("duplicate novel: scene %q branch %q (%s and %s)", n.SceneID, NormalizeBranch(n.Branch), prev, key))
 		}
 		seenNovels[key] = n.SceneID
+	}
+
+	for _, msg := range d.BranchIsolatedStateIssues() {
+		issues = append(issues, msg)
 	}
 
 	return issues

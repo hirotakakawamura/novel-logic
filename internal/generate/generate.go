@@ -178,6 +178,18 @@ func genTheorems(d *project.Data) string {
 	fmt.Fprintf(&b, "theorem fixed_facts_stable :\n")
 	fmt.Fprintf(&b, "    fixedFactsStable allFixedFacts allStateDecls allActions timeOrder := by\n")
 	fmt.Fprintf(&b, "  native_decide\n\n")
+	for _, bid := range branchIDs(d) {
+		ident := leanIdent(bid)
+		fmt.Fprintf(&b, "theorem actions_in_scene_window_%s :\n", ident)
+		fmt.Fprintf(&b, "    allActionsInSceneWindows sceneWindows timeOrder activeActions_%s scopeToScene := by\n", ident)
+		fmt.Fprintf(&b, "  native_decide\n\n")
+		fmt.Fprintf(&b, "theorem no_forbidden_transitions_%s :\n", ident)
+		fmt.Fprintf(&b, "    allActionsRespectRules projectRules activeActions_%s := by\n", ident)
+		fmt.Fprintf(&b, "  native_decide\n\n")
+		fmt.Fprintf(&b, "theorem fixed_facts_stable_%s :\n", ident)
+		fmt.Fprintf(&b, "    fixedFactsStable allFixedFacts allStateDecls activeActions_%s timeOrder := by\n", ident)
+		fmt.Fprintf(&b, "  native_decide\n\n")
+	}
 	for _, r := range d.Rules {
 		if r.Kind == project.RuleForbidState && lastTime != "" {
 			fmt.Fprintf(&b, "theorem forbid_state_%s_%s_at_end :\n",

@@ -277,8 +277,13 @@ func (d *Data) ActiveActions(branchID string) []Action {
 			mergeAt = merge.At
 		}
 		childFork := ""
+		childEntryAction := ""
 		if i < len(lineage)-1 {
-			childFork = d.forkAtForChild(bid, lineage[i+1])
+			child := lineage[i+1]
+			childFork = d.forkAtForChild(bid, child)
+			if b, _ := d.FindBranchDef(child); b != nil {
+				childEntryAction = b.ViaAction
+			}
 		}
 
 		for _, a := range d.Actions {
@@ -288,8 +293,10 @@ func (d *Data) ActiveActions(branchID string) []Action {
 			if forkAt != "" && !d.TimeLE(forkAt, a.At) {
 				continue
 			}
-			if childFork != "" && d.TimeLE(childFork, a.At) {
-				continue
+			if childFork != "" && bid != branchID {
+				if d.TimeLE(childFork, a.At) && !(a.At == childFork && a.ID == childEntryAction) {
+					continue
+				}
 			}
 			if mergeAt != "" && d.TimeLE(mergeAt, a.At) {
 				continue

@@ -1,2 +1,7 @@
 - id: main
   label: 本線
+- id: branch_dog
+  label: 犬ルート
+  parent: main
+  via_fork: fork_t7
+  via_action: act_fork_dog

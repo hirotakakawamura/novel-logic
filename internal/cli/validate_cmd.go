@@ -16,7 +16,8 @@ var validateCmd = &cobra.Command{
 		if err != nil {
 			return exitErr(4, err)
 		}
-		issues := validate.Run(d)
+		branch, _ := cmd.Flags().GetString("branch")
+		issues := validate.RunForBranch(d, branch)
 		if len(issues) > 0 {
 			if !quiet {
 				fmt.Println(formatIssues(issues))
@@ -37,5 +38,6 @@ var validateCmd = &cobra.Command{
 }
 
 func init() {
+	validateCmd.Flags().String("branch", "", "validate a single story branch (default: all branches)")
 	rootCmd.AddCommand(validateCmd)
 }

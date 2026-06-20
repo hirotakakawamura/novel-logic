@@ -27,7 +27,8 @@ var checkCmd = &cobra.Command{
 		if err != nil {
 			return exitErr(4, err)
 		}
-		issues := validate.Run(d)
+		branch, _ := cmd.Flags().GetString("branch")
+		issues := validate.RunForBranch(d, branch)
 		if len(issues) > 0 {
 			_ = d.RecordCheck(false, false, false, formatIssues(issues))
 			if !quiet {
@@ -88,5 +89,6 @@ func init() {
 	checkCmd.Flags().BoolVar(&checkQuick, "quick", false, "Stage 1 only")
 	checkCmd.Flags().BoolVar(&checkNoGenerate, "no-generate", false, "skip generate, run lake build only")
 	checkCmd.Flags().IntVarP(&checkJobs, "jobs", "j", 0, "lake build -j")
+	checkCmd.Flags().String("branch", "", "validate a single story branch (default: all branches)")
 	rootCmd.AddCommand(checkCmd)
 }

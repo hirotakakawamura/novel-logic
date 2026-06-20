@@ -1,0 +1,7 @@
+- id: fork_t7
+  parent_branch: main
+  at: t7
+  scope: plot
+  choices:
+    - action: act_fork_dog
+      branch: branch_dog

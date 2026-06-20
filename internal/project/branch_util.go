@@ -51,8 +51,11 @@ func (d *Data) FindMergeForBranch(branchID string) *Merge {
 	branchID = NormalizeBranch(branchID)
 	for i := range d.Merges {
 		m := &d.Merges[i]
+		if branchID == NormalizeBranch(m.IntoBranch) {
+			continue
+		}
 		for _, c := range m.Choices {
-			if c.Branch == branchID {
+			if NormalizeBranch(c.Branch) == branchID {
 				return m
 			}
 		}
@@ -76,4 +79,9 @@ func (d *Data) validateBranchRef(branch string) error {
 
 func (d *Data) branchClosed(branchID string) bool {
 	return d.FindMergeForBranch(branchID) != nil
+}
+
+// ValidateBranchExists reports whether branchID is registered.
+func (d *Data) ValidateBranchExists(branchID string) error {
+	return d.validateBranchRef(NormalizeBranch(branchID))
 }

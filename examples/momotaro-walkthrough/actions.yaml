@@ -5,6 +5,7 @@
   at: t4
   scope: plot
   label: 育った
+  branch: main
 - id: act2
   thing: momotaro
   from: 村在住
@@ -12,6 +13,7 @@
   at: t6
   scope: plot
   label: 鬼退治へ出発
+  branch: main
 - id: act3
   thing: inu
   from: 野良
@@ -19,6 +21,7 @@
   at: t8
   scope: plot
   label: 黍団子でもらい仲間になる
+  branch: main
 - id: act4
   thing: saru
   from: 野良
@@ -26,6 +29,7 @@
   at: t9
   scope: plot
   label: 黍団子でもらい仲間になる
+  branch: main
 - id: act5
   thing: kiji
   from: 野良
@@ -33,6 +37,7 @@
   at: t10
   scope: plot
   label: 黍団子でもらい仲間になる
+  branch: main
 - id: act6
   thing: oni
   from: 健在
@@ -40,13 +45,47 @@
   at: t12
   scope: plot
   label: 桃太郎一行に退治される
-- id: act7
+  branch: main
+- id: act_fork_dog
   thing: momotaro
   from: 旅立ち
+  to: 犬のみ道
+  at: t7
+  scope: plot
+  label: 犬だけを仲間にするルートへ
+  branch: main
+- id: act_dog_inu
+  thing: inu
+  from: 野良
+  to: 仲間
+  at: t8
+  scope: plot
+  label: 犬ルートで犬のみ仲間に
+  branch: branch_dog
+- id: act_merge_dog
+  thing: momotaro
+  from: 犬のみ道
+  to: 鬼退治準備
+  at: t11
+  scope: plot
+  label: 犬ルートから本線へ合流
+  branch: branch_dog
+- id: act_merge_main
+  thing: momotaro
+  from: 旅立ち
+  to: 鬼退治準備
+  at: t11
+  scope: plot
+  label: 三匹仲間ルートから合流
+  branch: main
+- id: act7
+  thing: momotaro
+  from: 鬼退治準備
   to: 鬼退治済み
   at: t12
   scope: plot
   label: 鬼が島で鬼を退治する
+  branch: main
 - id: act8
   thing: momotaro
   from: 赤ちゃん
@@ -54,3 +93,4 @@
   at: t4
   scope: novel:scene2
   label: 育った
+  branch: main

@@ -3,103 +3,136 @@
   thing: momotaro
   pred: 人間
   scope: plot
+  branch: main
 - id: fact2
   kind: fixed
   thing: ojiisan
   pred: 人間
   scope: plot
+  branch: main
 - id: fact3
   kind: fixed
   thing: obaasan
   pred: 人間
   scope: plot
+  branch: main
 - id: fact4
   kind: fixed
   thing: inu
   pred: 動物
   scope: plot
+  branch: main
 - id: fact5
   kind: fixed
   thing: saru
   pred: 動物
   scope: plot
+  branch: main
 - id: fact6
   kind: fixed
   thing: kiji
   pred: 動物
   scope: plot
+  branch: main
 - id: fact7
   kind: state
   thing: momotaro
   pred: 赤ちゃん
   scope: plot
+  branch: main
 - id: fact8
   kind: state
   thing: momotaro
   pred: 青年
   scope: plot
+  branch: main
 - id: fact9
   kind: state
   thing: momotaro
   pred: 村在住
   scope: plot
+  branch: main
 - id: fact10
   kind: state
   thing: momotaro
   pred: 旅立ち
   scope: plot
+  branch: main
 - id: fact11
   kind: state
   thing: inu
   pred: 野良
   scope: plot
+  branch: main
 - id: fact12
   kind: state
   thing: inu
   pred: 仲間
   scope: plot
+  branch: main
 - id: fact13
   kind: state
   thing: saru
   pred: 野良
   scope: plot
+  branch: main
 - id: fact14
   kind: state
   thing: saru
   pred: 仲間
   scope: plot
+  branch: main
 - id: fact15
   kind: state
   thing: kiji
   pred: 野良
   scope: plot
+  branch: main
 - id: fact16
   kind: state
   thing: kiji
   pred: 仲間
   scope: plot
+  branch: main
 - id: fact17
   kind: state
   thing: oni
   pred: 健在
   scope: plot
+  branch: main
 - id: fact18
   kind: state
   thing: oni
   pred: 退治済み
   scope: plot
+  branch: main
 - id: fact19
   kind: state
   thing: momotaro
   pred: 鬼退治済み
   scope: plot
+  branch: main
 - id: fact20
   kind: state
   thing: momotaro
   pred: 赤ちゃん
   scope: novel:scene2
+  branch: main
 - id: fact21
   kind: state
   thing: momotaro
   pred: 青年
   scope: novel:scene2
+  branch: main
+- id: fact22
+  kind: state
+  thing: momotaro
+  pred: 犬のみ道
+  scope: plot
+  branch: main
+- id: fact23
+  kind: state
+  thing: momotaro
+  pred: 鬼退治準備
+  scope: plot
+  branch: main
