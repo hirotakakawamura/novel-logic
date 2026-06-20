@@ -498,7 +498,24 @@ gh api repos/hirotakakawamura/novel-logic/collaborators/USERNAME \
 gh api repos/hirotakakawamura/novel-logic/collaborators --jq '.[].login'
 ```
 
-**admin merge について**: 共同開発者が未参加・未承認のまま merge する `--admin` bypass は **緊急時のみ**。通常運用では共同開発者の Approve を経由する。
+**暫定運用（現状・ソロメンテナー）**
+
+共同開発者を追加する予定がない間は、次の手順で運用する（**2026-06-21 確定**）。
+
+1. feature ブランチで作業 → PR 作成
+2. CI（`test`）が green であることを確認
+3. 内容を自己レビュー（GitHub 上の **Approve は不可** — 自己承認はプラットフォームが拒否）
+4. メンテナーが **`gh pr merge --squash --admin`** で merge
+
+```bash
+gh pr merge <番号> --squash --admin --delete-branch
+```
+
+ブランチ保護の「1 承認必須」は維持しつつ、承認者がいない期間は admin bypass で補う。**複数アカウントでの自己承認代行は行わない。**
+
+**将来（共同開発者参加時）**
+
+共同開発者を Collaborator として追加したら、暫定運用をやめ、上記「レビューの流れ」どおり **他者 Approve → Squash merge** に移行する。
 
 ### 13.5 PR ルール
 
@@ -595,3 +612,4 @@ Test: go test ./...
 | 2026-06-21 | §13 Git ブランチ管理方針を確定（Trunk-Based + Squash + 1 承認） |
 | 2026-06-21 | §13.5 GitHub `main` ブランチ保護を有効化 |
 | 2026-06-21 | §13.4 共同開発者・相互レビュー運用を追加 |
+| 2026-06-21 | §13.4 ソロメンテナー暫定運用（admin merge）を明記 |
