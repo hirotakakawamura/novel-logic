@@ -330,7 +330,7 @@ novel-logic novel add scene2
 # scene3〜scene5 も同様
 ```
 
-`novels.yaml` にメタが入り、空の `novels/scene1.txt` などができます（既にファイルがある場合はそのまま参照）。
+`novels.yaml` にメタが入り、空の `novels/main/scene1.txt` などができます（既にファイルがある場合はそのまま参照）。
 
 ### 7b. 本文を書く
 
@@ -559,7 +559,7 @@ novel-logic action add --thing momotaro --from 旅立ち --to 鬼退治済み \
 | `thing list` | `--tag <tag>`（繰り返し可・**すべて**持つ thing のみ） / `--scope plot` |
 | `fact list` | `--tag <tag>` / `--kind fixed\|state\|all` / `--thing <id>` / `--scope <scope>` |
 | `action list` | `--tag <tag>` / `--thing <id>` |
-| `timeline` | `--verbose` |
+| `timeline` | `--verbose` / `--branch <id>` |
 | `novel show` | `--full` |
 
 `--tag` の例:
@@ -586,16 +586,16 @@ novel-logic scene show --help
 ## 完成したタイムライン
 
 ```
-t1   scene1 [novel: scene1.txt]  桃太郎誕生
-t3   scene2 [novel: scene2.txt]  育てられる
+t1   scene1 [novels/main/scene1.txt]  桃太郎誕生
+t3   scene2 [novels/main/scene2.txt]  育てられる
 t4         桃太郎: 赤ちゃん → 青年
-t5   scene3 [novel: scene3.txt]  旅立ち決意
+t5   scene3 [novels/main/scene3.txt]  旅立ち決意
 t6         桃太郎: 村在住 → 旅立ち
-t7   scene4 [novel: scene4.txt]  仲間入り
+t7   scene4 [novels/main/scene4.txt]  仲間入り（branch_dog は novels/branch_dog/scene4.txt）
 t8         犬:   野良 → 仲間
 t9         猿:   野良 → 仲間
 t10        雉:   野良 → 仲間
-t11  scene5 [novel: scene5.txt]  鬼退治
+t11  scene5 [novels/main/scene5.txt]  鬼退治
 t12        鬼:     健在 → 退治済み
            桃太郎: 旅立ち → 鬼退治済み
 ```
@@ -611,17 +611,21 @@ t12        鬼:     健在 → 退治済み
 | `things.yaml` | 登場要素 |
 | `scenes.yaml` | scene 定義 |
 | `times.yaml` | time の存在リスト |
-| `facts.yaml` | fixed_fact + state |
-| `actions.yaml` | 状態遷移 |
+| `branches.yaml` | story branch（`main`, `branch_dog` 等） |
+| `forks.yaml` | 分岐点（`fork_t7`） |
+| `merges.yaml` | 合流点（`merge_t11`） |
+| `facts.yaml` | fixed_fact + state（`branch` 付き） |
+| `actions.yaml` | 状態遷移（`branch` 付き） |
 | `rules.yaml` | 禁則 |
-| `novels.yaml` | 本文メタ（scene ごと） |
-| `novels/*.txt` | 本文テキスト（git 管理。CLI は書き込まない） |
+| `novels.yaml` | 本文メタ（scene × branch） |
+| `novels/main/*.txt` | 本線の本文（git 管理） |
+| `novels/branch_dog/*.txt` | 分岐ルートの本文 |
 | `logic/` | `check` 時に自動生成される Lean プロジェクト（手編集非推奨） |
 
 ### 現在の登録件数（参考）
 
 ```
-things: 10 / scenes: 5 / facts: 19 / actions: 7 / rules: 3 / novels: 5
+things: 10 / scenes: 5 / facts: 19+ / actions: 10+ / rules: 3 / novels: 6（main×5 + branch_dog×1）
 ```
 
 ---
@@ -681,7 +685,7 @@ export PATH="$HOME/novel-logic/bin:$PATH"
 
 ### Q. CLI で本文（散文）を登録できないの？
 
-**意図的にありません。** 本文は `novels/<scene_id>.txt` をエディタで書き、git で管理します。  
+**意図的にありません。** 本文は `novels/<branch>/<scene_id>.txt`（本線は `novels/main/`）をエディタで書き、git で管理します。  
 CLI ができるのは `novel add`（メタ + 空ファイル）、`novel revision pin`（git commit 記録）、`novel show`（表示）です。
 
 ### Q. 他の作品を始めたい
@@ -698,4 +702,5 @@ cd ~/novels/my-story
 
 - コマンドの全一覧: [docs/COMMANDS.md](../../docs/COMMANDS.md)
 - ドメインモデルの詳細: [docs/REQUIREMENTS.md](../../docs/REQUIREMENTS.md)
+- 開発者向けテスト: リポジトリルートで `go test ./...`（GitHub Actions でも実行）
 - 対話型ウィザード（`novel-logic wizard`）は Phase 1 予定

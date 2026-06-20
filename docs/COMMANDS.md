@@ -1,6 +1,6 @@
 # novel-logic — CUI コマンド仕様
 
-> 最終更新: 2026-06-20  
+> 最終更新: 2026-06-21
 > 関連: [REQUIREMENTS.md](REQUIREMENTS.md) · 正本: [DRAFT.txt](DRAFT.txt)
 
 バイナリ名は **`novel-logic`**（確定）。以下は `novel-logic` で記載する。
@@ -51,7 +51,7 @@ plot / novel 二層のデータ操作で使う。
 |--------|------|
 | `-q` / `--quiet` | エラー時以外は出力抑制 |
 | `-v` / `--verbose` | 詳細ログ（矛盾チェックの内訳等） |
-| `--json` | 機械可読出力（`list` / `show` / `status` / `validate` 等） |
+| `--json` | 機械可読出力（**Phase 1 予定**。現行実装では未対応） |
 
 ### 0.5 登録拒否時の応答
 
@@ -83,11 +83,14 @@ plot / novel 二層のデータ操作で使う。
   things.yaml
   scenes.yaml
   times.yaml
-  facts.yaml            # fixed_fact + state
+  branches.yaml         # story branch 定義（`main` 含む）
+  forks.yaml            # 分岐点（初回 fork 登録時に作成）
+  merges.yaml           # 合流点（初回 merge 登録時に作成）
+  facts.yaml            # fixed_fact + state（`branch` 省略時 `main`）
   actions.yaml
   rules.yaml
-  novels.yaml           # novel メタ（scene ごと1件・1:1）
-  novels/               # 本文（<scene_id>.txt、git 管理）
+  novels.yaml           # novel メタ（scene × branch ごと1件）
+  novels/               # 本文（`<branch>/<scene_id>.txt`、git 管理）
   logic/                # generate 後（手編集非推奨）
 ```
 
@@ -136,8 +139,8 @@ CLI バージョンと Lean Core テンプレバージョン。
 
 | フラグ | 説明 |
 |--------|------|
-| `--scope plot\|all` | plot のみ / novel 含む全体（デフォルト: `all`） |
-| `--verbose` | 各 time の active state 概要 |
+| `--branch <id>` | 表示する active action を branch 限定（デフォルト: `main`） |
+| `--verbose` | 各 time の fact / action 概要 |
 
 ---
 
@@ -293,12 +296,14 @@ fixed_fact または state を登録（A4）。
 | `--thing <id>` | ○ | 主語 thing |
 | `--pred <text>` | ○ | 述語（`PredId` に写像。既存 **thing ID と同名は拒否** — [REQUIREMENTS §6.3.1](REQUIREMENTS.md)） |
 | `--scope plot` | — | デフォルト `plot` |
+| `--branch <id>` | — | story branch（デフォルト: `main`） |
 
 例:
 
 ```bash
 novel-logic fact add --kind fixed --thing momotaro --pred 人間
 novel-logic fact add --kind state --thing momotaro --pred 赤ちゃん
+novel-logic fact add --kind state --thing momotaro --pred 犬仲間あり --branch main
 ```
 
 **重複**: 同一 `(kind, thing, pred, scope)` の `add` は拒否。変更は `fact update <id>`。
@@ -329,11 +334,13 @@ action を登録（A5）。
 | `--at <time_id>` | ○ | 発生 time |
 | `--label <text>` | — | 人間向けラベル（例: `育った`） |
 | `--scope plot` | — | デフォルト `plot` |
+| `--branch <id>` | — | story branch（デフォルト: `main`） |
 
 例:
 
 ```bash
 novel-logic action add --thing momotaro --from 赤ちゃん --to 青年 --at t4 --label 育った
+novel-logic action add --branch branch_dog --thing inu --from 野良 --to 仲間 --at t8 --label 犬のみ仲間
 ```
 
 **重複**: 同一 `(thing, from, to, at, scope)` の `add` は拒否（`label` は重複キーに含まない）。変更は `action update <id>`。
@@ -358,6 +365,7 @@ rule を登録（プロット設計段階で推奨）。
 | `--pred <text>` | △ | `forbid-state` 時必須 |
 | `--from <pred>` | △ | `forbid-transition` 時必須 |
 | `--to <pred>` | △ | `forbid-transition` 時必須 |
+| `--branch <id>` | — | story branch（デフォルト: `main`） |
 
 例:
 
@@ -429,7 +437,7 @@ scene に紐づく novel メタを登録（B1）。デフォルトで空の `nov
 
 ```bash
 novel-logic novel add scene1
-# エディタで novels/scene1.txt を編集 → git commit
+# エディタで novels/main/scene1.txt を編集 → git commit
 novel-logic novel revision pin scene1 --note "初稿"
 ```
 
@@ -447,6 +455,7 @@ novel-logic novel revision pin scene1 --note "初稿"
 
 | フラグ | 説明 |
 |--------|------|
+| `--branch <id>` | story branch（デフォルト: `main`） |
 | `--revision <sha>` | 明示的な commit SHA（省略時: 当該ファイルの最新 commit） |
 | `--note <text>` | メモ（PR 番号等） |
 | `--allow-dirty` | 作業ツリーに未コミット変更があっても pin |
@@ -459,6 +468,7 @@ pin 履歴（`revisions[]`）を表示。
 
 | フラグ | デフォルト | 説明 |
 |--------|-----------|------|
+| `--branch <id>` | `main` | story branch |
 | `--keep-body` | `true` | 本文 `.txt` をディスクに残す（git 履歴保持） |
 
 ---
@@ -509,7 +519,6 @@ novel-logic novel remove <scene_id>    # デフォルト --keep-body
 | フラグ | 説明 |
 |--------|------|
 | `--branch <id>` | 単一 branch のみ検証（省略時: 全 branch） |
-| `--scope <scope>` | 特定スコープのみ検証 |
 
 ---
 
@@ -520,7 +529,7 @@ novel-logic novel remove <scene_id>    # デフォルト --keep-body
 
 | フラグ | 説明 |
 |--------|------|
-| `--dry-run` | 書き込まず差分プレビュー |
+| `--dry-run` | 書き込まず差分プレビュー（**Phase 1 予定**。現行実装では未対応） |
 
 ---
 
@@ -568,9 +577,13 @@ novel-logic
 ├── action list | show | add | update | remove
 ├── rule list | show | add | update | remove
 │
-├── validate
+├── branch list | show | add | remove
+├── fork add | choice add | show
+├── merge add | show
+│
+├── validate [--branch]
 ├── generate
-├── check                    … メイン（Stage 1 + 生成 + Stage 2）
+├── check [--branch | --quick]   … メイン（Stage 1 + 生成 + Stage 2）
 │
 └── wizard plot | novel      … Phase 1 補助（対話型）
 ```
@@ -596,8 +609,8 @@ novel-logic action add --thing momotaro --from 赤ちゃん --to 青年 --at 4
 
 # Phase B
 novel-logic novel add scene1
-# エディタで novels/scene1.txt を編集
-git add novels/scene1.txt && git commit -m "scene1 prose"
+# エディタで novels/main/scene1.txt を編集
+git add novels/main/scene1.txt && git commit -m "scene1 prose"
 novel-logic novel revision pin scene1
 novel-logic fact add --kind state --thing momotaro --pred 青年 --scope novel:scene5
 novel-logic action add --thing momotaro --from 旅立ち --to 鬼退治済み \
@@ -626,10 +639,23 @@ novel-logic check
 
 ### CI
 
+**リポジトリ本体**（`novel-logic` 開発用）:
+
 ```bash
-novel-logic -C ./momotaro validate   # revision ずれ・未コミット変更を検出
-novel-logic -C ./momotaro check
+go test ./...
 ```
+
+GitHub Actions（[`.github/workflows/test.yml`](../.github/workflows/test.yml)）が `push` / `pull_request` で上記を実行します。
+
+**作品データ**（ユーザーが `init` したディレクトリ）:
+
+```bash
+novel-logic -C ./momotaro validate              # Stage 1（全 branch）
+novel-logic -C ./momotaro validate --branch main
+novel-logic -C ./momotaro check                 # Stage 1 + Lean 生成 + lake build
+```
+
+Lean toolchain が CI ランナーに無い場合は `validate` または `check --quick` を使います。
 
 ---
 
@@ -670,7 +696,10 @@ Phase B（B1–B4）を順に質問。
 - [x] **永続化形式**: YAML ファイル群（§1 `init` の分割。詳細は [REQUIREMENTS §7.3](REQUIREMENTS.md)）
 - [x] **CLI 体系**: サブコマンド型を正 + `novel-logic wizard` は Phase 1 補助（§8）
 - [x] **バイナリ名**: `novel-logic`（`nl` エイリアスは採用しない）
-- [x] **scene ↔ novel**: Phase 0 は 1:1。本文は `novels/*.txt` + git。1:N は Phase 1 で拡張検討
+- [x] **scene ↔ novel**: branch 内 1:1。本文は `novels/<branch>/<scene>.txt` + git。1:N は Phase 1 で拡張検討
+- [x] **branch / fork / merge**: `branches.yaml` / `forks.yaml` / `merges.yaml` + `--branch` フラグ
+- [x] **単体テスト**: `internal/cli`, `generate`, `project`, `validate`
+- [x] **GitHub Actions**: `go test ./...`（Lean 不要）
 - [x] **thing ID**: 作品内一意。`thing add` は新規のみ。スコープ追加は `thing scope add`
 - [x] **add / update 分離**: fact / action / rule / thing の同一キー `add` は拒否
 - [x] **novel revision pin**: git commit を `novels.yaml` に記録
@@ -698,3 +727,5 @@ Phase B（B1–B4）を順に質問。
 | 2026-06-20 | Lean テンプレ詳細を確定（§6.3.1） |
 | 2026-06-21 | novel: git 管理 `.txt` + `novel add` / `revision pin`。`novel set` 廃止 |
 | 2026-06-21 | add/update 分離、thing scope add、`update` コマンド追加 |
+| 2026-06-21 | branch/fork/merge、`validate`/`check --branch`、`timeline --branch` を反映 |
+| 2026-06-21 | CI（GitHub Actions）、単体テスト、未実装フラグ（`--json`/`--dry-run`）を明記 |

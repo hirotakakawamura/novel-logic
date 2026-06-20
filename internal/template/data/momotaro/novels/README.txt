@@ -7,4 +7,4 @@ Register a scene body:
 After committing prose in git, pin the revision for check/CI:
   novel-logic novel revision pin <scene_id> [--note "PR #42"]
 
-Default path: novels/<scene_id>.txt
+Default path: novels/main/<scene_id>.txt (use --branch for alternate routes)

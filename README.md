@@ -62,9 +62,9 @@ novel-logic novel add <scene_id> [--branch main]        # メタ登録 + novels/
 novel-logic branch list / fork add / merge add          # 物語分岐・合流
 novel-logic timeline --branch <id>                      # branch 限定の action 列
 novel-logic novel revision pin <scene_id> [--branch main]
-novel-logic validate          # Stage 1 のみ
-novel-logic check             # Stage 1 + Lean 生成 + lake build
-novel-logic check --quick     # Stage 1 のみ（Lean 不要）
+novel-logic validate [--branch <id>]   # Stage 1 のみ（省略時は全 branch）
+novel-logic check [--branch <id>]      # Stage 1 + Lean 生成 + lake build
+novel-logic check --quick              # Stage 1 のみ（Lean 不要）
 
 # 更新（同一内容の add は拒否 → update を使用）
 novel-logic thing update <id> --name ... --tag ...
@@ -105,19 +105,28 @@ PJ=./examples/momotaro-walkthrough
 
 ## ステータス
 
-- **Phase 0（MVP）**: Go CLI、YAML 永続化、Stage 1/2、桃太郎 end-to-end 完了
+- **Phase 0（MVP）**: 完了 — Go CLI、YAML 永続化、branch/fork/merge、Stage 1/2、桃太郎 end-to-end、単体テスト、GitHub Actions CI
 - **Phase 1 予定**: 対話ウィザード、plot ↔ novel 横断の厳格化、Tier 1 定理
+
+## テスト・CI
+
+```bash
+go test ./...    # internal/cli, generate, project, validate
+```
+
+リポジトリの [`.github/workflows/test.yml`](.github/workflows/test.yml) が `push` / `pull_request` で `go test ./...` を実行します（Lean 不要）。作品データの `check`（Stage 2）はローカルまたは別 CI ジョブで実行してください。
 
 ## ディレクトリ構成
 
 ```
 novel-logic/
-  cmd/novel-logic/       # CLI エントリポイント
-  internal/              # ドメイン・検証・Lean 生成
-  docs/                  # 要件・コマンド仕様
+  cmd/novel-logic/         # CLI エントリポイント
+  internal/                # ドメイン・検証・Lean 生成
+  .github/workflows/       # CI（go test）
+  docs/                    # 要件・コマンド仕様
   examples/
-    momotaro/            # テンプレート由来の完成サンプル
-    momotaro-walkthrough/  # 手順付きチュートリアル用データ
+    momotaro/              # テンプレート由来の完成サンプル
+    momotaro-walkthrough/  # 手順付きチュートリアル（branch_dog 分岐デモ含む）
 ```
 
-作品データはユーザーが `init` で作成する別ディレクトリでも管理できます。
+作品データはユーザーが `init` で作成する別ディレクトリでも管理できます。本文は `novels/<branch>/<scene_id>.txt`（本線は `novels/main/`）。
