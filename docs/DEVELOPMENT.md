@@ -472,9 +472,9 @@ test/<短い説明>     # テスト追加のみ（任意）
 
 メンテナーが `main` に直接 push した場合も、**事後に PR 相当の説明**（コミットメッセージまたは Issue 参照）を残す。
 
-### 13.5 GitHub `main` 保護設定（推奨）
+### 13.5 GitHub `main` 保護設定
 
-リポジトリ Settings → Branches → Branch protection rules で `main` に以下を設定する。
+リポジトリ Settings → Branches → Branch protection rules で `main` に以下を設定する（**2026-06-21 設定済み**）。
 
 | 設定 | 値 |
 |------|-----|
@@ -552,3 +552,4 @@ Test: go test ./...
 |------|------|
 | 2026-06-21 | 初版。Phase 0 完了時点の構成・方針・協業ガイド |
 | 2026-06-21 | §13 Git ブランチ管理方針を確定（Trunk-Based + Squash + 1 承認） |
+| 2026-06-21 | §13.5 GitHub `main` ブランチ保護を有効化 |
