@@ -1,0 +1,14 @@
+# Go build output
+/bin/
+*.exe
+*.test
+
+# Lean / lake
+**/.lake/
+
+# Editor / OS
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store

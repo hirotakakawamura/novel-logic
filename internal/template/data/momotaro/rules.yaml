@@ -1,0 +1,12 @@
+- id: rule1
+  kind: forbid-transition
+  from: 青年
+  to: 赤ちゃん
+- id: rule2
+  kind: forbid-transition
+  from: 人間
+  to: 動物
+- id: rule3
+  kind: forbid-state
+  thing: momotaro
+  pred: 動物

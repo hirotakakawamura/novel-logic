@@ -1,0 +1,7 @@
+- id: act1
+  thing: momotaro
+  from: 赤ちゃん
+  to: 青年
+  at: t4
+  scope: plot
+  label: 育った
