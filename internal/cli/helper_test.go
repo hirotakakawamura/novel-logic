@@ -8,6 +8,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+
 	"novel-logic/internal/testfixture"
 )
 
@@ -18,6 +21,24 @@ func resetCLIGlobals() {
 	checkQuick = false
 	checkNoGenerate = false
 	checkJobs = 0
+	resetCLIFlags(rootCmd)
+}
+
+func resetCLIFlags(cmd *cobra.Command) {
+	cmd.Flags().VisitAll(resetFlagValue)
+	cmd.PersistentFlags().VisitAll(resetFlagValue)
+	for _, c := range cmd.Commands() {
+		resetCLIFlags(c)
+	}
+}
+
+func resetFlagValue(f *pflag.Flag) {
+	f.Changed = false
+	if sv, ok := f.Value.(pflag.SliceValue); ok {
+		_ = sv.Replace(nil)
+		return
+	}
+	_ = f.Value.Set(f.DefValue)
 }
 
 func runCLI(t *testing.T, args ...string) (stdout string, exitCode int) {
