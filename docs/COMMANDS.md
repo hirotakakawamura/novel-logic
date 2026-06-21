@@ -343,8 +343,8 @@ action を登録（A5）。
 | フラグ | 必須 | 説明 |
 |--------|------|------|
 | `--thing <id>` | ○ | 主語 thing |
-| `--from <pred>` | — | 遷移元述語（省略可） |
-| `--to <pred>` | ○ | 遷移先述語 |
+| `--from <pred>` | — | 遷移元述語（省略可＝初期状態への遷移。`forbid-transition` は **from 非空時のみ**照合） |
+| `--to <pred>` | ○ | 遷移先述語（`forbid-state` は to で照合） |
 | `--at <time_id>` | ○ | 発生 time |
 | `--label <text>` | — | 人間向けラベル（例: `育った`） |
 | `--scope plot` | — | デフォルト `plot` |
@@ -356,6 +356,8 @@ action を登録（A5）。
 novel-logic action add --thing momotaro --from 赤ちゃん --to 青年 --at t4 --label 育った
 novel-logic action add --branch branch_dog --thing inu --from 野良 --to 仲間 --at t8 --label 犬のみ仲間
 ```
+
+**time 窓**: `scope=novel:<scene>` の action は scene の `[time_start, time_end]` 内であること（Stage 1 エラー）。`scope=plot`（デフォルト）は窓チェック対象外 — `validate` の `action.plot_scene_hint` で Phase B 整合を促す。
 
 **重複**: 同一 `(thing, from, to, at, scope)` の `add` は拒否（`label` は重複キーに含まない）。変更は `action update <id>`。
 
@@ -377,7 +379,7 @@ rule を登録（プロット設計段階で推奨）。
 | `--kind forbid-transition` | ○* | 遷移禁止: `--from` + `--to` と併用 |
 | `--thing <id>` | △ | `forbid-state` 時必須 |
 | `--pred <text>` | △ | `forbid-state` 時必須 |
-| `--from <pred>` | △ | `forbid-transition` 時必須 |
+| `--from <pred>` | △ | `forbid-transition` 時必須（rule 定義側。action 側の from 省略は初期遷移として許容） |
 | `--to <pred>` | △ | `forbid-transition` 時必須 |
 | `--branch <id>` | — | story branch（デフォルト: `main`） |
 
@@ -499,7 +501,7 @@ pin 履歴（`revisions[]`）を表示。
 
 A4 / A5 と同型。`--scope novel:<scene_id>` を指定（B3 / B4）。
 
-登録時に plot 側との整合も Stage 1 で検証する（Phase 0 では警告、Phase 1 で厳格化可）。
+Phase 0: Stage 1 は `novel:<scene>` の **time 窓**（`time.action_window`）のみ厳格。plot との整合は `validate` の **hint**（`action.plot_scene_hint`）。plot ↔ novel 横断の厳格検証（`novel_extends_plot`）は **Phase 1 / Tier 1**（[REQUIREMENTS §6.5](REQUIREMENTS.md)）。
 
 ---
 
@@ -756,3 +758,4 @@ Phase B（B1–B4）を順に質問。
 | 2026-06-21 | add/update 分離、thing scope add、`update` コマンド追加 |
 | 2026-06-21 | branch/fork/merge、`validate`/`check --branch`、`timeline --branch` を反映 |
 | 2026-06-21 | CI（GitHub Actions）、単体テスト、未実装フラグ（`--json`/`--dry-run`）を明記 |
+| 2026-06-21 | 設計判断 #14/#16/#20: plot time 窓は hint のみ、`novel_extends_plot` は Phase 1、空 `from` と forbid-transition |
