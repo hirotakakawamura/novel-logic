@@ -16,7 +16,6 @@ import (
 var (
 	checkQuick      bool
 	checkNoGenerate bool
-	checkJobs       int
 )
 
 var checkCmd = &cobra.Command{
@@ -61,7 +60,7 @@ var checkCmd = &cobra.Command{
 			return exitErrf(5, "lean/lake not found in PATH")
 		}
 		logicDir := filepath.Join(d.Root, project.DirLogic)
-		out, err := lean.LakeBuild(logicDir, checkJobs)
+		out, err := lean.LakeBuild(logicDir)
 		if err != nil {
 			_ = d.RecordCheck(false, true, false, trimOutput(out))
 			if !quiet {
@@ -88,7 +87,6 @@ func trimOutput(s string) string {
 func init() {
 	checkCmd.Flags().BoolVar(&checkQuick, "quick", false, "Stage 1 only")
 	checkCmd.Flags().BoolVar(&checkNoGenerate, "no-generate", false, "skip generate, run lake build only")
-	checkCmd.Flags().IntVarP(&checkJobs, "jobs", "j", 0, "lake build -j")
 	checkCmd.Flags().String("branch", "", "validate a single story branch (default: all branches)")
 	rootCmd.AddCommand(checkCmd)
 }

@@ -1,6 +1,9 @@
 package project
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestBranchIssuesCleanProject(t *testing.T) {
 	d := newTestProject(t)
@@ -9,11 +12,28 @@ func TestBranchIssuesCleanProject(t *testing.T) {
 	}
 }
 
+func TestBranchIssuesIncludesIsolatedState(t *testing.T) {
+	d := newTestProject(t)
+	if err := d.AddBranch("branch_a", "alt", MainBranch, "", ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := d.AddAction("hero", "mid", "alt_only", "t3", "plot", "", "branch_a"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := d.AddAction("hero", "alt_only", "end", "t4", "plot", "", MainBranch); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := branchIssueMatching(BranchIssues(d), "branch.isolated_state", ""); !ok {
+		t.Fatal("expected branch.isolated_state via BranchIssues")
+	}
+}
+
 func TestBranchIssues(t *testing.T) {
 	tests := []struct {
 		name     string
 		mutate   func(t *testing.T, d *Data)
 		wantCode string
+		wantMsg  string
 	}{
 		{
 			name: "fact_unknown_branch",
@@ -131,6 +151,9 @@ func TestBranchIssues(t *testing.T) {
 		{
 			name: "fork_choice_action_wrong_at",
 			mutate: func(t *testing.T, d *Data) {
+				if err := d.AddBranch("branch_a", "", MainBranch, "", ""); err != nil {
+					t.Fatal(err)
+				}
 				actLate, err := d.AddAction("hero", "mid", "late", "t3", "plot", "", MainBranch)
 				if err != nil {
 					t.Fatal(err)
@@ -141,6 +164,7 @@ func TestBranchIssues(t *testing.T) {
 				})
 			},
 			wantCode: "fork.invalid",
+			wantMsg:  `expected "t2"`,
 		},
 		{
 			name: "merge_unknown_into_branch",
@@ -275,21 +299,6 @@ func TestBranchIssues(t *testing.T) {
 			},
 			wantCode: "novel.duplicate",
 		},
-		{
-			name: "branch_isolated_state",
-			mutate: func(t *testing.T, d *Data) {
-				if err := d.AddBranch("branch_a", "alt", MainBranch, "", ""); err != nil {
-					t.Fatal(err)
-				}
-				if _, err := d.AddAction("hero", "mid", "alt_only", "t3", "plot", "", "branch_a"); err != nil {
-					t.Fatal(err)
-				}
-				if _, err := d.AddAction("hero", "alt_only", "end", "t4", "plot", "", MainBranch); err != nil {
-					t.Fatal(err)
-				}
-			},
-			wantCode: "branch.isolated_state",
-		},
 	}
 
 	for _, tt := range tests {
@@ -297,18 +306,22 @@ func TestBranchIssues(t *testing.T) {
 			d := newTestProject(t)
 			tt.mutate(t, d)
 			issues := BranchIssues(d)
-			if !hasBranchIssueCode(issues, tt.wantCode) {
-				t.Fatalf("want code %q, got %v", tt.wantCode, issues)
+			if _, ok := branchIssueMatching(issues, tt.wantCode, tt.wantMsg); !ok {
+				t.Fatalf("want code %q msg %q, got %v", tt.wantCode, tt.wantMsg, issues)
 			}
 		})
 	}
 }
 
-func hasBranchIssueCode(issues []BranchIssue, code string) bool {
-	for _, iss := range issues {
-		if iss.Code == code {
-			return true
+func branchIssueMatching(issues []BranchIssue, code, msgSub string) (*BranchIssue, bool) {
+	for i := range issues {
+		if issues[i].Code != code {
+			continue
 		}
+		if msgSub != "" && !strings.Contains(issues[i].Message, msgSub) {
+			continue
+		}
+		return &issues[i], true
 	}
-	return false
+	return nil, false
 }

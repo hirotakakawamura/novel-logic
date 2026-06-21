@@ -31,7 +31,7 @@ func TestLakeBuildNotFound(t *testing.T) {
 	t.Cleanup(func() { _ = os.Setenv("PATH", oldPath) })
 
 	dir := t.TempDir()
-	out, err := LakeBuild(dir, 0)
+	out, err := LakeBuild(dir)
 	if err == nil {
 		t.Fatal("expected error when lean/lake missing")
 	}
@@ -57,7 +57,6 @@ func TestDetectFindsToolsWhenPresent(t *testing.T) {
 			t.Fatalf("empty version string")
 		}
 	}
-	_ = filepath.Dir(tc.Lake)
 }
 
 func TestLakeBuildSuccess(t *testing.T) {
@@ -67,13 +66,13 @@ func TestLakeBuildSuccess(t *testing.T) {
 	}
 
 	logicDir := walkthroughLogicDir(t)
-	out, err := LakeBuild(logicDir, 0)
+	out, err := LakeBuild(logicDir)
 	if err != nil {
 		t.Fatalf("LakeBuild: %v\noutput:\n%s", err, out)
 	}
 }
 
-func TestLakeBuildPassesJobsFlag(t *testing.T) {
+func TestLakeBuildInvokesLakeBuildOnly(t *testing.T) {
 	tmpBin := t.TempDir()
 	logPath := filepath.Join(t.TempDir(), "lake-args.log")
 	fakeLean := filepath.Join(tmpBin, "lean")
@@ -91,7 +90,7 @@ func TestLakeBuildPassesJobsFlag(t *testing.T) {
 	t.Cleanup(func() { _ = os.Setenv("PATH", oldPath) })
 
 	logicDir := t.TempDir()
-	out, err := LakeBuild(logicDir, 2)
+	out, err := LakeBuild(logicDir)
 	if err != nil {
 		t.Fatalf("LakeBuild: %v\noutput:\n%s", err, out)
 	}
@@ -99,9 +98,9 @@ func TestLakeBuildPassesJobsFlag(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	got := string(args)
-	if !strings.Contains(got, "-j") || !strings.Contains(got, "2") {
-		t.Fatalf("lake args = %q, want -j 2", got)
+	got := strings.TrimSpace(string(args))
+	if got != "build" {
+		t.Fatalf("lake args = %q, want build only (lake has no -j flag)", got)
 	}
 }
 
@@ -116,7 +115,7 @@ func TestLakeBuildFailsOnInvalidLean(t *testing.T) {
 	if err := os.WriteFile(theorems, []byte("syntax error here\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	out, err := LakeBuild(logicDir, 0)
+	out, err := LakeBuild(logicDir)
 	if err == nil {
 		t.Fatalf("expected build failure, output:\n%s", out)
 	}

@@ -33,16 +33,12 @@ func (tc Toolchain) Version() string {
 	return strings.TrimSpace(string(out))
 }
 
-func LakeBuild(logicDir string, jobs int) (string, error) {
+func LakeBuild(logicDir string) (string, error) {
 	tc := Detect()
 	if !tc.Found {
 		return "", fmt.Errorf("lean/lake not found in PATH")
 	}
-	args := []string{"build"}
-	if jobs > 0 {
-		args = append(args, "-j", fmt.Sprintf("%d", jobs))
-	}
-	cmd := exec.Command(tc.Lake, args...)
+	cmd := exec.Command(tc.Lake, "build")
 	cmd.Dir = logicDir
 	out, err := cmd.CombinedOutput()
 	return string(out), err

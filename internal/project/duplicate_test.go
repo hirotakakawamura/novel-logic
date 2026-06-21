@@ -14,9 +14,9 @@ func TestFactKeyIncludesBranch(t *testing.T) {
 	}
 }
 
-func TestNormalizeScopeDefaultsPlot(t *testing.T) {
+func TestFactKeyNormalizesEmptyScope(t *testing.T) {
 	if got := FactKey(FactState, "hero", "mid", "", MainBranch); got != FactKey(FactState, "hero", "mid", "plot", MainBranch) {
-		t.Fatalf("empty scope should normalize to plot in keys")
+		t.Fatalf("empty scope should normalize to plot in FactKey")
 	}
 }
 
@@ -255,11 +255,8 @@ func TestDuplicateIssues(t *testing.T) {
 			d := newTestProject(t)
 			tt.mutate(t, d)
 			issues := DuplicateIssues(d)
-			if len(issues) == 0 {
-				t.Fatal("expected duplicate issue")
-			}
-			if !strings.Contains(issues[0], tt.wantSub) {
-				t.Fatalf("issue = %q, want substring %q", issues[0], tt.wantSub)
+			if !duplicateIssueContaining(issues, tt.wantSub) {
+				t.Fatalf("issues = %v, want substring %q", issues, tt.wantSub)
 			}
 		})
 	}
@@ -291,6 +288,15 @@ func TestDuplicateIssuesCleanProject(t *testing.T) {
 	if issues := DuplicateIssues(d); len(issues) != 0 {
 		t.Fatalf("expected no issues, got %v", issues)
 	}
+}
+
+func duplicateIssueContaining(issues []string, wantSub string) bool {
+	for _, iss := range issues {
+		if strings.Contains(iss, wantSub) {
+			return true
+		}
+	}
+	return false
 }
 
 func assertRegistrationError(t *testing.T, err error, wantSubs ...string) {
