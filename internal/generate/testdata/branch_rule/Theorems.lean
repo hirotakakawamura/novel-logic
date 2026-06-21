@@ -40,22 +40,6 @@ theorem fixed_facts_stable_branch_a :
     fixedFactsStable fixedFacts_branch_a stateDecls_branch_a activeActions_branch_a timeOrder := by
   native_decide
 
-theorem actions_in_scene_window_main :
-    allActionsInSceneWindows sceneWindows timeOrder activeActions_main scopeToScene := by
-  native_decide
-
-theorem no_forbidden_states_main :
-    noForbiddenStatesRegistered projectRules_main stateDecls_main := by
-  native_decide
-
-theorem no_forbidden_transitions_main :
-    allActionsRespectRules projectRules_main activeActions_main := by
-  native_decide
-
-theorem fixed_facts_stable_main :
-    fixedFactsStable fixedFacts_main stateDecls_main activeActions_main timeOrder := by
-  native_decide
-
 theorem forbid_state_branch_a_hero_bad_at_end :
     ¬ listContains (predsAt fixedFacts_branch_a stateDecls_branch_a activeActions_branch_a timeOrder TimeId.t4 ThingId.hero) PredId.bad := by
   native_decide

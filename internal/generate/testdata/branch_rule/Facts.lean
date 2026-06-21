@@ -23,10 +23,6 @@ abbrev allFixedFacts := fixedFacts_main
 
 abbrev allStateDecls := stateDecls_main
 
-def allActions : List (ActionDecl ThingId PredId TimeId Scope) := [
-  ⟨ThingId.hero, some PredId.start, PredId.mid, TimeId.t2, Scope.plot⟩,
-]
-
 def activeActions_branch_a : List (ActionDecl ThingId PredId TimeId Scope) := [
   ⟨ThingId.hero, some PredId.start, PredId.mid, TimeId.t2, Scope.plot⟩,
 ]

@@ -94,11 +94,6 @@ func genFacts(d *project.Data) string {
 	mainIdent := leanIdent(project.MainBranch)
 	fmt.Fprintf(&b, "abbrev allFixedFacts := fixedFacts_%s\n\n", mainIdent)
 	fmt.Fprintf(&b, "abbrev allStateDecls := stateDecls_%s\n\n", mainIdent)
-	fmt.Fprintf(&b, "def allActions : List (ActionDecl ThingId PredId TimeId Scope) := [\n")
-	for _, a := range d.Actions {
-		fmt.Fprintf(&b, "  %s,\n", actionDeclExpr(a))
-	}
-	fmt.Fprintf(&b, "]\n\n")
 	for _, bid := range bids {
 		ident := leanIdent(bid)
 		acts := d.ActiveActions(bid)
@@ -199,6 +194,9 @@ func genTheorems(d *project.Data) string {
 	fmt.Fprintf(&b, "    fixedFactsStable fixedFacts_%s stateDecls_%s activeActions_%s timeOrder := by\n", mainIdent, mainIdent, mainIdent)
 	fmt.Fprintf(&b, "  native_decide\n\n")
 	for _, bid := range branchIDs(d) {
+		if project.NormalizeBranch(bid) == project.MainBranch {
+			continue
+		}
 		ident := leanIdent(bid)
 		fmt.Fprintf(&b, "theorem actions_in_scene_window_%s :\n", ident)
 		fmt.Fprintf(&b, "    allActionsInSceneWindows sceneWindows timeOrder activeActions_%s scopeToScene := by\n", ident)
