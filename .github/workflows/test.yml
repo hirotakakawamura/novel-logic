@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  MIN_COVERAGE: "80"
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -17,8 +20,32 @@ jobs:
           go-version: "1.22"
           cache: true
 
-      - name: Run tests
-        run: go test ./...
+      - name: Run tests with coverage
+        run: go test ./... -coverprofile=coverage.out -covermode=atomic
+
+      - name: Coverage summary
+        run: |
+          go tool cover -func=coverage.out | tee coverage-summary.txt
+          echo "### Coverage summary" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat coverage-summary.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Enforce minimum coverage
+        run: |
+          total=$(awk '/^total:/ {gsub(/%/,"",$3); print $3}' coverage-summary.txt)
+          echo "Total coverage: ${total}% (minimum ${MIN_COVERAGE}%)"
+          awk -v t="$total" -v m="$MIN_COVERAGE" 'BEGIN { if (t+0 < m+0) { print "coverage below threshold"; exit 1 } }'
+
+      - name: Upload coverage profile
+        uses: actions/upload-artifact@v6
+        with:
+          name: coverage
+          retention-days: 7
+          path: |
+            coverage.out
+            coverage-summary.txt
+          if-no-files-found: error
 
   lean-check:
     runs-on: ubuntu-latest

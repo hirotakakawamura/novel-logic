@@ -24,7 +24,7 @@ func resetCLIGlobals() {
 	verbose = false
 	checkQuick = false
 	checkNoGenerate = false
-	checkJobs = 0
+
 	// rootCmd is a package-global cobra tree; flags persist across Execute calls unless reset.
 	resetCLIFlags(rootCmd)
 }

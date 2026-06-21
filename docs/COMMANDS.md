@@ -597,7 +597,6 @@ validate → generate → lake build
 | `--quick` | `validate` のみ（Stage 1） |
 | `--branch <id>` | 単一 branch のみ Stage 1 検証（省略時: 全 branch） |
 | `--no-generate` | 既存 `logic/` のまま Stage 2 のみ |
-| `-j` / `--jobs` | `lake build -j` に渡す |
 
 **成功時**: `OK: stage1 + stage2`、証明された定理名一覧（Tier 0+）。
 
@@ -731,6 +730,10 @@ Phase B（B1–B4）を順に質問。
 
 ## 9. Phase 1 以降（その他予約）
 
+| フラグ / コマンド | 概要 |
+|-------------------|------|
+| `check -j` / `--jobs` | `lake build` の並列度（現行 Lake は未対応のため Phase 1 予約） |
+
 | コマンド | 概要 |
 |----------|------|
 | `novel-logic diff` | 前回成功 `check` からの作品データ / 生成 Lean 差分 |
@@ -783,3 +786,4 @@ Phase B（B1–B4）を順に質問。
 | 2026-06-21 | CI（GitHub Actions）、単体テスト、未実装フラグ（`--json`/`--dry-run`）を明記 |
 | 2026-06-21 | 設計判断 #14/#16/#20: plot time 窓は hint のみ、`novel_extends_plot` は Phase 1、空 `from` と forbid-transition |
 | 2026-06-21 | #17 CI lean-check、#18 §0–7/§8–9 章分け、#22 doctor 推奨ファイルと Load 差の明記 |
+| 2026-06-21 | `check --jobs` を Phase 1 予約へ（Lake は `-j` 非対応） |

@@ -307,7 +307,10 @@ git diff internal/generate/testdata/   # 差分を確認してからコミット
 [`.github/workflows/test.yml`](../.github/workflows/test.yml):
 
 - トリガー: `push` / `pull_request` → `main`
-- **`test`**: `go test ./...`（Lean 不要）
+- **`test`**: `go test ./... -coverprofile=coverage.out -covermode=atomic`（Lean 不要）
+  - Step Summary に `go tool cover -func` の一覧
+  - 全体カバレッジ **80% 未満で失敗**（`MIN_COVERAGE`）
+  - `coverage.out` / `coverage-summary.txt` を artifact 保存（7 日）
 - **`lean-check`**: elan インストール → `examples/momotaro-walkthrough` と `examples/momotaro` で `novel-logic check -q`（Stage 2）
 
 PR を出す前にローカルで `go test ./...` を通すこと。Lean 生成・定理を変えたら `lean-check` 相当の `check` もローカルで確認する。
