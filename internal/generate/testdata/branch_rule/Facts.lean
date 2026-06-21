@@ -5,6 +5,13 @@ namespace test
 
 open NovelLogic
 
+def fixedFacts_branch_a : List (FixedFact ThingId PredId Scope) := [
+]
+
+def stateDecls_branch_a : List (StateDecl ThingId PredId Scope) := [
+  ⟨ThingId.hero, PredId.start, Scope.plot⟩,
+]
+
 def fixedFacts_main : List (FixedFact ThingId PredId Scope) := [
 ]
 
@@ -15,6 +22,13 @@ def stateDecls_main : List (StateDecl ThingId PredId Scope) := [
 abbrev allFixedFacts := fixedFacts_main
 
 abbrev allStateDecls := stateDecls_main
+
+def activeActions_branch_a : List (ActionDecl ThingId PredId TimeId Scope) := [
+  ⟨ThingId.hero, some PredId.start, PredId.mid, TimeId.t2, Scope.plot⟩,
+]
+
+def evolveBranch_branch_a (t : TimeId) (thing : ThingId) : List PredId :=
+  predsAt fixedFacts_branch_a stateDecls_branch_a activeActions_branch_a timeOrder t thing
 
 def activeActions_main : List (ActionDecl ThingId PredId TimeId Scope) := [
   ⟨ThingId.hero, some PredId.start, PredId.mid, TimeId.t2, Scope.plot⟩,

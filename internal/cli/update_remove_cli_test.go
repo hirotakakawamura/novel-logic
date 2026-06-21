@@ -74,6 +74,14 @@ func TestRuleUpdatePred(t *testing.T) {
 	}
 }
 
+func TestFactUpdateRejectsDemoteToFixed(t *testing.T) {
+	dir := writeCLIProject(t)
+	_, code := runCLI(t, "-C", dir, "fact", "update", "fact1", "--kind", "fixed")
+	if code != 1 {
+		t.Fatalf("exit code = %d, want 1 for state→fixed demotion", code)
+	}
+}
+
 func TestFactUpdateRejectsForbidState(t *testing.T) {
 	dir := writeCLIProject(t)
 	if _, code := runCLI(t, "-C", dir, "rule", "add",

@@ -34,7 +34,7 @@ func (d *Data) FindFact(id string) (*Fact, int) {
 }
 
 func duplicateFactError(existing Fact, kind FactKind, thing, pred, scope string) error {
-	return fmt.Errorf(
+	return registrationErrorf(
 		"duplicate fact: same (kind=%s, thing=%s, pred=%s, scope=%s) already exists as %s; use: novel-logic fact update %s",
 		kind, thing, pred, normalizeScope(scope), existing.ID, existing.ID,
 	)
@@ -66,7 +66,7 @@ func (d *Data) FindAction(id string) (*Action, int) {
 }
 
 func duplicateActionError(existing Action, thing, from, to, at, scope string) error {
-	return fmt.Errorf(
+	return registrationErrorf(
 		"duplicate action: same (thing=%s, from=%s, to=%s, at=%s, scope=%s) already exists as %s; use: novel-logic action update %s",
 		thing, emptyDash(from), to, at, normalizeScope(scope), existing.ID, existing.ID,
 	)
@@ -115,22 +115,22 @@ func (d *Data) FindRule(id string) (*Rule, int) {
 func duplicateRuleError(existing Rule) error {
 	switch existing.Kind {
 	case RuleForbidState:
-		return fmt.Errorf(
+		return registrationErrorf(
 			"duplicate rule: same forbid-state (thing=%s, pred=%s) already exists as %s; use: novel-logic rule update %s",
 			existing.Thing, existing.Pred, existing.ID, existing.ID,
 		)
 	case RuleForbidTransition:
-		return fmt.Errorf(
+		return registrationErrorf(
 			"duplicate rule: same forbid-transition (from=%s, to=%s) already exists as %s; use: novel-logic rule update %s",
 			existing.From, existing.To, existing.ID, existing.ID,
 		)
 	default:
-		return fmt.Errorf("duplicate rule %q already exists; use: novel-logic rule update %s", existing.ID, existing.ID)
+		return registrationErrorf("duplicate rule %q already exists; use: novel-logic rule update %s", existing.ID, existing.ID)
 	}
 }
 
 func duplicateThingError(id string) error {
-	return fmt.Errorf(
+	return registrationErrorf(
 		"thing %q already exists; add scopes with: novel-logic thing scope add %s --scope <scope>; change fields with: novel-logic thing update %s",
 		id, id, id,
 	)

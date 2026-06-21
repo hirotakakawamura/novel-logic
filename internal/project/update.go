@@ -2,6 +2,19 @@ package project
 
 import "fmt"
 
+func (d *Data) SetPlot(title, summary string) error {
+	if title == "" && summary == "" {
+		return fmt.Errorf("at least one of title or summary is required")
+	}
+	if title != "" {
+		d.Meta.Title = title
+	}
+	if summary != "" {
+		d.Plot.Summary = summary
+	}
+	return nil
+}
+
 func (d *Data) UpdateThing(id, name string, tags []string, replaceTags bool) error {
 	if id == "" {
 		return fmt.Errorf("thing id is required")
@@ -32,6 +45,9 @@ func (d *Data) UpdateFact(id string, kind FactKind, thing, pred, scope string) e
 	}
 	if kind != FactFixed && kind != FactState {
 		return fmt.Errorf("kind must be fixed or state")
+	}
+	if f.Kind == FactState && kind == FactFixed {
+		return registrationErrorf("cannot demote state fact %q to fixed; fixed→state promotion uses: novel-logic fact promote %s", id, id)
 	}
 	if thing == "" || pred == "" {
 		return fmt.Errorf("thing and pred are required")

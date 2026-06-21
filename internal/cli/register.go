@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -10,6 +11,32 @@ import (
 )
 
 var plotCmd = &cobra.Command{Use: "plot", Short: "Plot operations"}
+var plotSetCmd = &cobra.Command{
+	Use:   "set",
+	Short: "Set plot title and summary",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		d, err := loadProject()
+		if err != nil {
+			return exitErr(4, err)
+		}
+		title, _ := cmd.Flags().GetString("title")
+		summary, _ := cmd.Flags().GetString("summary")
+		filePath, _ := cmd.Flags().GetString("file")
+		if filePath != "" {
+			b, err := os.ReadFile(filePath)
+			if err != nil {
+				return exitErr(4, err)
+			}
+			summary = string(b)
+		}
+		if title == "" && summary == "" {
+			return exitErrf(4, "specify at least one of --title, --summary, or --file")
+		}
+		return saveValidated(d, func() error {
+			return d.SetPlot(title, summary)
+		})
+	},
+}
 var plotShowCmd = &cobra.Command{
 	Use:   "show",
 	Short: "Show plot summary and scenes",
@@ -303,7 +330,10 @@ func init() {
 	novelUpdateCmd.Flags().String("file", "", "new body path relative to project")
 	novelCmd.AddCommand(novelAddCmd, novelUpdateCmd)
 
-	plotCmd.AddCommand(plotShowCmd)
+	plotSetCmd.Flags().String("title", "", "project title (stored in project.yaml)")
+	plotSetCmd.Flags().String("summary", "", "plot summary (stored in plot.yaml)")
+	plotSetCmd.Flags().String("file", "", "plot summary text file (--summary alternative)")
+	plotCmd.AddCommand(plotSetCmd, plotShowCmd)
 	rootCmd.AddCommand(plotCmd, thingCmd, sceneCmd, timeCmd, factCmd, actionCmd, ruleCmd, novelCmd)
 	initShowCommands()
 	initUpdateCommands()

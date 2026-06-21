@@ -1,6 +1,9 @@
 package project
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func TestUpdateThingFactActionRule(t *testing.T) {
 	d := newTestProject(t)
@@ -36,6 +39,34 @@ func TestUpdateThingFactActionRule(t *testing.T) {
 	}
 	if r2 == nil || r2.Pred != "corrupt" {
 		t.Fatalf("rule = %+v", r2)
+	}
+}
+
+func TestSetPlot(t *testing.T) {
+	d := newTestProject(t)
+	if err := d.SetPlot("New Title", "New summary"); err != nil {
+		t.Fatal(err)
+	}
+	if d.Meta.Title != "New Title" || d.Plot.Summary != "New summary" {
+		t.Fatalf("meta=%+v plot=%+v", d.Meta, d.Plot)
+	}
+	if err := d.SetPlot("", ""); err == nil {
+		t.Fatal("expected error for empty set")
+	}
+}
+
+func TestUpdateFactRejectsDemotion(t *testing.T) {
+	d := newTestProject(t)
+	if err := d.UpdateFact("fact1", FactState, "hero", "origin", "plot"); err != nil {
+		t.Fatal(err)
+	}
+	err := d.UpdateFact("fact1", FactFixed, "hero", "origin", "plot")
+	if err == nil {
+		t.Fatal("expected demotion error")
+	}
+	var reg *RegistrationError
+	if !errors.As(err, &reg) {
+		t.Fatalf("expected RegistrationError, got %T: %v", err, err)
 	}
 }
 

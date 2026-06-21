@@ -257,7 +257,7 @@ func (d *Data) AddAction(thing, from, to, at, scope, label, branch string) (Acti
 		return Action{}, err
 	}
 	if merge := d.FindMergeForBranch(branch); merge != nil && d.branchClosed(branch) {
-		return Action{}, fmt.Errorf("branch %q is closed after merge %q; register on %q", branch, merge.ID, merge.IntoBranch)
+		return Action{}, registrationErrorf("branch %q is closed after merge %q; register on %q", branch, merge.ID, merge.IntoBranch)
 	}
 	if err := validateScopeRef(d, scope); err != nil {
 		return Action{}, err

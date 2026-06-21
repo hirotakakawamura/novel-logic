@@ -9,6 +9,14 @@ import (
 	"novel-logic/internal/project"
 )
 
+func TestThingAddDuplicateExits1(t *testing.T) {
+	dir := writeCLIProject(t)
+	_, code := runCLI(t, "-C", dir, "thing", "add", "hero", "--tag", "dup")
+	if code != 1 {
+		t.Fatalf("exit code = %d, want 1 for duplicate thing", code)
+	}
+}
+
 func TestFactAddRejectsForbidState(t *testing.T) {
 	dir := writeCLIProject(t)
 	if _, code := runCLI(t, "-C", dir, "rule", "add",

@@ -31,7 +31,7 @@ func TestRunBranchRuleSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	names := []string{"Rules.lean", "Theorems.lean"}
+	names := []string{"Facts.lean", "Rules.lean", "Theorems.lean"}
 	for _, name := range names {
 		gotPath := filepath.Join(d.Root, project.DirLogic, name)
 		got, err := os.ReadFile(gotPath)
