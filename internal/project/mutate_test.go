@@ -171,6 +171,7 @@ func TestAddBranchRemoveBranch(t *testing.T) {
 
 func TestBranchIssuesUnknownBranch(t *testing.T) {
 	d := newTestProject(t)
+	// AddFact rejects unknown branches; inject invalid state to exercise BranchIssues.
 	d.Facts = append(d.Facts, Fact{
 		ID: "fact_orphan", Kind: FactState, Thing: "hero", Pred: "lost",
 		Scope: "plot", Branch: "nonexistent_branch",

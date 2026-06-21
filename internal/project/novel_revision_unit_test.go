@@ -10,14 +10,11 @@ import (
 func TestPinNovelRevisionAndHints(t *testing.T) {
 	d := newTestProject(t)
 	dir := d.Root
-	runGitTest(t, dir, "init")
-	runGitTest(t, dir, "config", "user.email", "test@example.com")
-	runGitTest(t, dir, "config", "user.name", "Test User")
+	gitInitTestRepo(t, dir)
 	if err := d.AddNovel("scene1", MainBranch, "", true); err != nil {
 		t.Fatal(err)
 	}
-	runGitTest(t, dir, "add", ".")
-	runGitTest(t, dir, "commit", "-m", "add novel")
+	gitCommitAllTest(t, dir, "add novel")
 
 	if hints := NovelRevisionHints(d); len(hints) == 0 {
 		t.Fatal("expected unpinned hint")
@@ -38,14 +35,11 @@ func TestPinNovelRevisionAndHints(t *testing.T) {
 func TestNovelRevisionIssuesOnDriftAndDirty(t *testing.T) {
 	d := newTestProject(t)
 	dir := d.Root
-	runGitTest(t, dir, "init")
-	runGitTest(t, dir, "config", "user.email", "test@example.com")
-	runGitTest(t, dir, "config", "user.name", "Test User")
+	gitInitTestRepo(t, dir)
 	if err := d.AddNovel("scene1", MainBranch, "", true); err != nil {
 		t.Fatal(err)
 	}
-	runGitTest(t, dir, "add", ".")
-	runGitTest(t, dir, "commit", "-m", "v1")
+	gitCommitAllTest(t, dir, "v1")
 	if _, err := d.PinNovelRevision("scene1", MainBranch, "", "", false); err != nil {
 		t.Fatal(err)
 	}
@@ -79,14 +73,11 @@ func issueContains(issues []string, sub string) bool {
 func TestPinNovelRevisionRejectsDirty(t *testing.T) {
 	d := newTestProject(t)
 	dir := d.Root
-	runGitTest(t, dir, "init")
-	runGitTest(t, dir, "config", "user.email", "test@example.com")
-	runGitTest(t, dir, "config", "user.name", "Test User")
+	gitInitTestRepo(t, dir)
 	if err := d.AddNovel("scene1", MainBranch, "", true); err != nil {
 		t.Fatal(err)
 	}
-	runGitTest(t, dir, "add", ".")
-	runGitTest(t, dir, "commit", "-m", "v1")
+	gitCommitAllTest(t, dir, "v1")
 
 	body := filepath.Join(dir, DefaultNovelBodyPath("scene1", MainBranch))
 	if err := os.WriteFile(body, []byte("dirty edit\n"), 0o644); err != nil {
