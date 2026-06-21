@@ -98,7 +98,7 @@ plot
 | ルール | 内容 |
 |--------|------|
 | 構造の類似 | fixed_fact と state は同じ「A は B である」形式 |
-| **昇格** | fixed_fact として定義したものを **後から state に変更できる** |
+| **昇格** | `novel-logic fact promote <id>` のみ（`fact update --kind state` は拒否） |
 | **降格** | state を fixed_fact に変更することは **できない**（`fact update --kind fixed` も拒否） |
 
 ### 3.3 thing 間の関係の表現
@@ -158,7 +158,7 @@ Phase 0 のルール:
 - 合流は **merge action** を各 from branch に登録し、**同じ `to` pred** へ遷移させる
 - merge 登録後、終了した子 branch への新規 action 登録は拒否
 
-**検証（Stage 1）**: `branch.unknown`, `fork.invalid`, `fork.exclusive`, `merge.action_mismatch`, `merge.after_action`, `branch.isolated_state`, `novel.branch_path` 等。`validate` / `check` に `--branch <id>`（省略時は全 branch）。
+**検証（Stage 1）**: `branch.unknown`, `fork.invalid`, `fork.exclusive`, `merge.action_mismatch`, `merge.after_action`, `branch.isolated_state`, `novel.missing_body`, `time.registry_mismatch` 等。`validate` / `check` に `--branch <id>`（省略時は全 branch）。
 
 ### 3.8 time の扱い
 
@@ -285,7 +285,7 @@ Lean 未インストールでも実行可能。
 | カテゴリ | チェック例 |
 |----------|-----------|
 | スキーマ | 必須フィールド、参照 ID の存在、thing の tag 形式（空文字・重複 tag の扱い） |
-| time | 順序性、scene/novel の区間包含、action の time 位置 |
+| time | 順序性、`time_order` と `times.yaml` の整合、scene/novel の区間包含、action の time 位置 |
 | rule | 明示 rule との抵触（登録拒否条件） |
 | state | 禁止 state の登録、fixed_fact ↔ state 昇格規則 |
 | 重複 | 同一スコープでの一意性違反 |
