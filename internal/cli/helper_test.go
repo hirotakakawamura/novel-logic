@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"novel-logic/internal/project"
 	"novel-logic/internal/testfixture"
 )
 
@@ -118,6 +119,18 @@ func runGitCLI(t *testing.T, dir string, args ...string) {
 	if err != nil {
 		t.Fatalf("git %s: %v\n%s", strings.Join(args, " "), err, out)
 	}
+}
+
+func lastActionID(t *testing.T, dir string) string {
+	t.Helper()
+	d, err := project.Load(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(d.Actions) == 0 {
+		t.Fatal("no actions")
+	}
+	return d.Actions[len(d.Actions)-1].ID
 }
 
 func copyWalkthroughProject(t *testing.T) string {
