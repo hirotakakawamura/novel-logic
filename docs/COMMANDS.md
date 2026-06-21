@@ -501,7 +501,7 @@ pin 履歴（`revisions[]`）を表示。
 
 A4 / A5 と同型。`--scope novel:<scene_id>` を指定（B3 / B4）。
 
-登録時に plot 側との整合も Stage 1 で検証する（Phase 0 では警告、Phase 1 で厳格化可）。
+Phase 0: Stage 1 は `novel:<scene>` の **time 窓**（`time.action_window`）のみ厳格。plot との整合は `validate` の **hint**（`action.plot_scene_hint`）。plot ↔ novel 横断の厳格検証（`novel_extends_plot`）は **Phase 1 / Tier 1**（[REQUIREMENTS §6.5](REQUIREMENTS.md)）。
 
 ---
 
@@ -758,3 +758,4 @@ Phase B（B1–B4）を順に質問。
 | 2026-06-21 | add/update 分離、thing scope add、`update` コマンド追加 |
 | 2026-06-21 | branch/fork/merge、`validate`/`check --branch`、`timeline --branch` を反映 |
 | 2026-06-21 | CI（GitHub Actions）、単体テスト、未実装フラグ（`--json`/`--dry-run`）を明記 |
+| 2026-06-21 | 設計判断 #14/#16/#20: plot time 窓は hint のみ、`novel_extends_plot` は Phase 1、空 `from` と forbid-transition |

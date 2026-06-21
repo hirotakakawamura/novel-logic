@@ -42,3 +42,15 @@ func TestCheckActionRulesEmptyFromSkipsForbidTransition(t *testing.T) {
 		t.Fatal("expected forbid-transition error when from is set")
 	}
 }
+
+func TestCheckActionRulesEmptyFromStillEnforcesForbidState(t *testing.T) {
+	d := &project.Data{
+		Rules: []project.Rule{{
+			ID: "rule1", Kind: project.RuleForbidState, Thing: "hero", Pred: "blocked",
+		}},
+	}
+	a := project.Action{Thing: "hero", From: "", To: "blocked", At: "t1"}
+	if err := CheckActionRules(d, a); err == nil {
+		t.Fatal("expected forbid-state error on to even when from is empty")
+	}
+}

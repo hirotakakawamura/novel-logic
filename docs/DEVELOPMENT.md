@@ -197,9 +197,13 @@ YAML ファイル群（作品ディレクトリ）
 | `branch.unknown` / `fork.invalid` / `merge.action_mismatch` | branch 整合 |
 | `branch.isolated_state` | 他 branch 専用 pred を from に参照 |
 | `duplicate` | ID 重複 |
+| `time.action_window` | `novel:<scene>` action の `at` が scene 窓外（`plot` スコープは対象外） |
+| `time.registry_mismatch` | `time_order` と `times.yaml` の乖離 |
 | `pred.thing_collision` | pred 文字列が thing ID と衝突 |
 
 実装: `internal/validate/validate.go`（全体）、`internal/validate/register.go`（登録前）。
+
+**hint**（`validate` / `check`、非致命）: `action.plot_scene_hint`（plot action が scene time 内にある場合の Phase B 整合提案）、`novel.revision_hint` 等。`check --quick` では表示しない。
 
 branch 関連の構造化 issue: `project.BranchIssue`（`branch_validate.go`）。文字列パースは使わない。
 
