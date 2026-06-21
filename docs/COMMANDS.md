@@ -132,6 +132,8 @@ plot / novel 二層のデータ操作で使う。
 
 **Load との差**: `project.Load` は必須は `project.yaml` のみ。上記 YAML が無くても読み込みは成功し、空スライスまたは `main` branch のデフォルトで補完する（[REQUIREMENTS §7.3](REQUIREMENTS.md)）。`doctor` はファイルの有無を報告する診断用。
 
+**終了コード**: 必須・推奨ファイルの欠落は情報表示のみ（§0.3 の `0`）。`elan` / `lean` / `lake` が揃わない場合のみ **終了コード 5**。
+
 ---
 
 ### `novel-logic template list`
@@ -690,7 +692,12 @@ novel-logic check
 go test ./...
 ```
 
-GitHub Actions（[`.github/workflows/test.yml`](../.github/workflows/test.yml)）が `push` / `pull_request` で上記を実行します。
+GitHub Actions（[`.github/workflows/test.yml`](../.github/workflows/test.yml)）が `push` / `pull_request` で次の 2 ジョブを実行します。
+
+| ジョブ | 内容 |
+|--------|------|
+| `test` | `go test ./...` |
+| `lean-check` | elan 導入後、`examples/momotaro-walkthrough` と `examples/momotaro` で `check -q`（Stage 2） |
 
 **作品データ**（ユーザーが `init` したディレクトリ）:
 
@@ -700,7 +707,7 @@ novel-logic -C ./momotaro validate --branch main
 novel-logic -C ./momotaro check                 # Stage 1 + Lean 生成 + lake build
 ```
 
-CI では `lean-check` ジョブが examples に対して `check`（Stage 2）を実行する。ローカルで Lean が無い場合は `validate` または `check --quick` を使う。
+ローカルで Lean が無い場合は `validate` または `check --quick` を使う。
 
 ---
 

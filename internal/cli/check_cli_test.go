@@ -58,6 +58,11 @@ func TestCheckStage2FailsOnBrokenLean(t *testing.T) {
 }
 
 func TestDoctorReportsRecommendedMissing(t *testing.T) {
+	tc := lean.Detect()
+	if !tc.Found {
+		t.Skip("lean/lake not installed")
+	}
+
 	dir := t.TempDir()
 	files := testfixture.MinimalFiles()
 	delete(files, project.FileBranches)
@@ -65,8 +70,8 @@ func TestDoctorReportsRecommendedMissing(t *testing.T) {
 	delete(files, project.FileMerges)
 	testfixture.WriteFiles(t, dir, files)
 	out, code := runCLI(t, "-C", dir, "doctor")
-	if code != 0 && code != 5 {
-		t.Fatalf("exit %d, output=%q", code, out)
+	if code != 0 {
+		t.Fatalf("exit %d, want 0 when lean present; output=%q", code, out)
 	}
 	for _, want := range []string{
 		"recommended_missing: branches.yaml",
@@ -75,6 +80,13 @@ func TestDoctorReportsRecommendedMissing(t *testing.T) {
 	} {
 		if !strings.Contains(out, want) {
 			t.Fatalf("output missing %q: %q", want, out)
+		}
+	}
+	for _, line := range strings.Split(out, "\n") {
+		for _, file := range []string{"branches.yaml", "forks.yaml", "merges.yaml"} {
+			if line == "missing: "+file {
+				t.Fatalf("recommended file reported as missing: %q in %q", file, out)
+			}
 		}
 	}
 }
