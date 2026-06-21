@@ -192,7 +192,7 @@ YAML ファイル群（作品ディレクトリ）
 
 | コード | 例 |
 |--------|-----|
-| `rule.violation` | forbid-state / forbid-transition 違反 |
+| `rule.violation` | forbid-state / forbid-transition 違反（`forbid-transition` は action `from` 非空時のみ。空 `from` は初期遷移として照合スキップ） |
 | `ref.thing` / `ref.time` | 存在しない参照 |
 | `branch.unknown` / `fork.invalid` / `merge.action_mismatch` | branch 整合 |
 | `branch.isolated_state` | 他 branch 専用 pred を from に参照 |

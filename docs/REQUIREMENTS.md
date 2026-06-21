@@ -425,7 +425,7 @@ def evolve (facts : List FixedFact) (actions : List Action) (t : TimeId) :
 
 | 定理 | 内容 |
 |------|------|
-| `actions_in_scene_window` | 各 action の `at` が所属 scope の time 区間内 |
+| `actions_in_scene_window` | 各 action の `at` が所属 scope の time 区間内（`plot` は `scopeToScene => none` で常に OK。`novel:<scene>` のみ scene 窓を検証 — §10.1 #8） |
 | `no_forbidden_states` | 登録 state が `forbiddenStates` に含まれない |
 | `no_forbidden_transitions` | 各 action の遷移が `forbiddenTransitions` に含まれない |
 | `fixed_facts_stable` | fixed_fact 述語が後続 action で破られない |
@@ -746,3 +746,4 @@ CLI は §4 の登録フローに対応する操作を提供する。詳細は [
 | 2026-06-21 | add/update 分離（重複 `add` 拒否）、`thing scope add`、各 `update` コマンド |
 | 2026-06-21 | Phase 0 完了を反映（branch/fork/merge、Lean branch 定理、テスト、CI） |
 | 2026-06-21 | §7.2–7.3 を `novels/<branch>/` 構成に更新 |
+| 2026-06-21 | 設計判断 #14/#16/#20 確定（plot time 窓は hint のみ、`novel_extends_plot` は Phase 1、空 `from` と forbid-transition） |

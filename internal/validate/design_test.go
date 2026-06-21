@@ -1,3 +1,7 @@
+// Design decision regression tests for GitHub issues #14, #16, #20.
+// #14: plot scope skips time window; novel:<scene> strict (hints only for plot).
+// #16: novel_extends_plot is Phase 1 — covered by docs, not tests here.
+// #20: empty action from skips forbid-transition; forbid-state still checks to.
 package validate
 
 import (
@@ -52,5 +56,35 @@ func TestCheckActionRulesEmptyFromStillEnforcesForbidState(t *testing.T) {
 	a := project.Action{Thing: "hero", From: "", To: "blocked", At: "t1"}
 	if err := CheckActionRules(d, a); err == nil {
 		t.Fatal("expected forbid-state error on to even when from is empty")
+	}
+}
+
+func TestRunEmptyFromSkipsForbidTransition(t *testing.T) {
+	d := testfixture.LoadMinimal(t)
+	d.Rules = append(d.Rules, project.Rule{
+		ID: "rule_ft", Kind: project.RuleForbidTransition,
+		From: "青年", To: "赤ちゃん", Branch: project.MainBranch,
+	})
+	d.Actions = append(d.Actions, project.Action{
+		ID: "act_init", Thing: "hero", From: "", To: "赤ちゃん",
+		At: "t1", Scope: "plot", Branch: project.MainBranch,
+	})
+	if hasIssueCode(Run(d), "rule.violation") {
+		t.Fatalf("empty from should skip forbid-transition in Run(), got %v", Run(d))
+	}
+}
+
+func TestRunEmptyFromEnforcesForbidState(t *testing.T) {
+	d := testfixture.LoadMinimal(t)
+	d.Rules = append(d.Rules, project.Rule{
+		ID: "rule_fs", Kind: project.RuleForbidState,
+		Thing: "hero", Pred: "blocked", Branch: project.MainBranch,
+	})
+	d.Actions = append(d.Actions, project.Action{
+		ID: "act_bad", Thing: "hero", From: "", To: "blocked",
+		At: "t1", Scope: "plot", Branch: project.MainBranch,
+	})
+	if !hasIssueCode(Run(d), "rule.violation") {
+		t.Fatalf("expected rule.violation for forbid-state on to, got %v", Run(d))
 	}
 }
