@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"strings"
 	"testing"
 
 	"novel-logic/internal/project"
@@ -93,9 +94,12 @@ func TestFactUpdateRejectsPromoteViaUpdate(t *testing.T) {
 
 func TestFactUpdateRejectsDemoteToFixed(t *testing.T) {
 	dir := writeCLIProject(t)
-	_, code := runCLI(t, "-C", dir, "fact", "update", "fact1", "--kind", "fixed")
+	out, code := runCLI(t, "-C", dir, "fact", "update", "fact1", "--kind", "fixed")
 	if code != 1 {
 		t.Fatalf("exit code = %d, want 1 for state→fixed demotion", code)
+	}
+	if !strings.Contains(out, "demotion is not allowed") {
+		t.Fatalf("output = %q", out)
 	}
 }
 

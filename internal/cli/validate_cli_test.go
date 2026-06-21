@@ -1,8 +1,12 @@
 package cli
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
+
+	"novel-logic/internal/project"
 )
 
 func TestValidateOK(t *testing.T) {
@@ -24,6 +28,24 @@ func TestValidateQuiet(t *testing.T) {
 	}
 	if strings.TrimSpace(out) != "" {
 		t.Fatalf("expected no output, got %q", out)
+	}
+}
+
+func TestValidateTimeRegistryMismatchCLI(t *testing.T) {
+	dir := writeCLIProject(t)
+	path := filepath.Join(dir, project.FileProject)
+	content := `title: test
+time_order: [t1, t2, t3, t4, ghost_time]
+`
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	out, code := runCLI(t, "-C", dir, "validate")
+	if code != 1 {
+		t.Fatalf("exit code = %d, want 1, output = %q", code, out)
+	}
+	if !strings.Contains(out, "[time.registry_mismatch]") {
+		t.Fatalf("output = %q", out)
 	}
 }
 

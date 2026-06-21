@@ -2,6 +2,7 @@ package project
 
 import (
 	"errors"
+	"strings"
 	"testing"
 )
 
@@ -83,6 +84,9 @@ func TestUpdateFactRejectsDemotion(t *testing.T) {
 	var reg *RegistrationError
 	if !errors.As(err, &reg) {
 		t.Fatalf("expected RegistrationError, got %T: %v", err, err)
+	}
+	if !strings.Contains(reg.Error(), "demotion is not allowed") {
+		t.Fatalf("message = %q", reg.Error())
 	}
 }
 

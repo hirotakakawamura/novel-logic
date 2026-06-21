@@ -3,6 +3,7 @@ package cli
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -86,8 +87,12 @@ func runCLI(t *testing.T, args ...string) (stdout string, exitCode int) {
 		var ee *ExitError
 		if errors.As(execErr, &ee) {
 			exitCode = ee.Code
+			if ee.Err != nil {
+				fmt.Fprintf(&combined, "Error: %s\n", ee.Err.Error())
+			}
 		} else {
 			exitCode = 1
+			fmt.Fprintf(&combined, "Error: %s\n", execErr.Error())
 		}
 	}
 	return combined.String(), exitCode

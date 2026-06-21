@@ -51,6 +51,13 @@ func TestTimeRegistryIssues(t *testing.T) {
 			wantSubs: []string{"empty time id in times.yaml"},
 		},
 		{
+			name: "duplicate_in_times_yaml",
+			mutate: func(d *Data) {
+				d.Times = append(d.Times, TimeEntry{ID: "t1"})
+			},
+			wantSubs: []string{`duplicate time "t1" in times.yaml`},
+		},
+		{
 			name: "deterministic_orphan_order",
 			mutate: func(d *Data) {
 				d.Times = append(d.Times,

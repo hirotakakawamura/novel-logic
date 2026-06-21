@@ -9,6 +9,17 @@ import (
 	"novel-logic/internal/project"
 )
 
+func TestTimeAddDuplicateExits1(t *testing.T) {
+	dir := writeCLIProject(t)
+	if _, code := runCLI(t, "-C", dir, "time", "add", "t5"); code != 0 {
+		t.Fatalf("first time add exit %d", code)
+	}
+	_, code := runCLI(t, "-C", dir, "time", "add", "t5")
+	if code != 1 {
+		t.Fatalf("exit code = %d, want 1 for duplicate time", code)
+	}
+}
+
 func TestThingAddDuplicateExits1(t *testing.T) {
 	dir := writeCLIProject(t)
 	_, code := runCLI(t, "-C", dir, "thing", "add", "hero", "--tag", "dup")

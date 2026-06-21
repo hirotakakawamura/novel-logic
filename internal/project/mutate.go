@@ -130,12 +130,12 @@ func (d *Data) AddTime(id, after string) error {
 	}
 	for _, t := range d.Times {
 		if t.ID == id {
-			return fmt.Errorf("time %q already exists", id)
+			return duplicateTimeError(id)
 		}
 	}
 	for _, t := range d.Meta.TimeOrder {
 		if t == id {
-			return fmt.Errorf("time %q already in time_order", id)
+			return duplicateTimeError(id)
 		}
 	}
 	d.Times = append(d.Times, TimeEntry{ID: id})

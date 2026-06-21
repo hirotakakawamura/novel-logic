@@ -9,11 +9,17 @@ import (
 func TimeRegistryIssues(d *Data) []string {
 	registry := make(map[string]bool)
 	var issues []string
+	seenYAML := make(map[string]bool)
 	for _, te := range d.Times {
 		if te.ID == "" {
 			issues = append(issues, "empty time id in times.yaml")
 			continue
 		}
+		if seenYAML[te.ID] {
+			issues = append(issues, fmt.Sprintf("duplicate time %q in times.yaml", te.ID))
+			continue
+		}
+		seenYAML[te.ID] = true
 		registry[te.ID] = true
 	}
 	seenOrder := make(map[string]bool)

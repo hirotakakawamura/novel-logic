@@ -49,7 +49,7 @@ plot / novel 二層のデータ操作で使う。
 | コード | 意味 |
 |--------|------|
 | `0` | 成功 |
-| `1` | Stage 1 検証エラー、登録拒否（重複 ID、rule 抵触、fact 昇格/降格の不正経路、novel 重複、merge 後の branch 登録拒否、`time.registry_mismatch` 等） |
+| `1` | Stage 1 検証エラー、登録拒否（重複 ID（thing / fact / action / time / novel 等）、rule 抵触、fact 昇格/降格の不正経路、merge 後の branch 登録拒否、`time.registry_mismatch` 等） |
 | `2` | Lean 生成エラー |
 | `3` | Stage 2（`lake build`）失敗 |
 | `4` | ユーザー入力・引数エラー（未知 ID、remove 拒否、必須フラグ不足等） |
@@ -290,7 +290,7 @@ scene を登録（A3）。
 
 ### `novel-logic time add <id>`
 
-time を順序付きで登録（scene / action の前提）。
+time を順序付きで登録（scene / action の前提）。**重複 ID は拒否（exit 1）**。
 
 | フラグ | 必須 | 説明 |
 |--------|------|------|
@@ -438,7 +438,9 @@ novel-logic novel add scene4 --branch branch_dog   # → novels/branch_dog/scene
 
 scene に紐づく novel メタを登録（B1）。デフォルトで空の `novels/<branch>/<scene_id>.txt` を作成。
 
-**cardinality（確定）**: **1 scene × 1 branch : 1 novel**。同一 branch で再登録はエラー（[REQUIREMENTS §3.6](REQUIREMENTS.md)）。
+**cardinality（確定）**: **1 scene × 1 branch : 1 novel**。同一 branch で再登録は **登録拒否（exit 1）**（[REQUIREMENTS §3.6](REQUIREMENTS.md)）。
+
+**重複メッセージの違い**: `novel add` の再登録は `novel for scene … already registered`（CLI 操作時）。`novels.yaml` に同一 `(scene, branch)` が二重に存在する場合は `validate` が `novel.duplicate`（`duplicate novel: scene … registered twice`）を報告する。後者は手編集 YAML の整合チェック用。
 
 | フラグ | 必須 | 説明 |
 |--------|------|------|
@@ -525,7 +527,7 @@ novel-logic novel remove <scene_id>    # デフォルト --keep-body
 **Stage 1 のみ**。作品データ全体の構造・制約を検証。Lean 不要。
 
 - スキーマ・参照 ID
-- time 順序・`time_order` と `times.yaml` の整合（`time.registry_mismatch`）
+- time 順序・`time_order` と `times.yaml` の整合（`time.registry_mismatch` — 欠落・重複・空 ID）
 - scene / novel 区間
 - rule / fact / action の抵触（**branch ごとの有効 action**）
 - fork / merge 整合、`branch.isolated_state`

@@ -285,7 +285,7 @@ Lean 未インストールでも実行可能。
 | カテゴリ | チェック例 |
 |----------|-----------|
 | スキーマ | 必須フィールド、参照 ID の存在、thing の tag 形式（空文字・重複 tag の扱い） |
-| time | 順序性、`time_order` と `times.yaml` の整合、scene/novel の区間包含、action の time 位置 |
+| time | 順序性、`time_order` と `times.yaml` の整合（欠落・重複・空 ID）、`time add` 重複は登録拒否（exit 1）、scene/novel の区間包含、action の time 位置 |
 | rule | 明示 rule との抵触（登録拒否条件） |
 | state | 禁止 state の登録、fixed_fact ↔ state 昇格規則 |
 | 重複 | 同一スコープでの一意性違反 |

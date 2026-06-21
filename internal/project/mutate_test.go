@@ -1,6 +1,9 @@
 package project
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func TestNewIDSkipsExisting(t *testing.T) {
 	existing := map[string]bool{"fact1": true}
@@ -50,6 +53,18 @@ func TestAddThingValidationErrors(t *testing.T) {
 		if err := tc.fn(); err == nil {
 			t.Fatalf("%s: expected error", tc.name)
 		}
+	}
+}
+
+func TestAddTimeDuplicateReturnsRegistrationError(t *testing.T) {
+	d := newTestProject(t)
+	err := d.AddTime("t1", "")
+	if err == nil {
+		t.Fatal("expected duplicate time error")
+	}
+	var reg *RegistrationError
+	if !errors.As(err, &reg) {
+		t.Fatalf("expected RegistrationError, got %T: %v", err, err)
 	}
 }
 
