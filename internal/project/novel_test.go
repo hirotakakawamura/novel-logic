@@ -1,6 +1,7 @@
 package project
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -29,8 +30,13 @@ func TestAddNovelPerBranch(t *testing.T) {
 	if _, err := os.Stat(body); err != nil {
 		t.Fatalf("expected body file: %v", err)
 	}
-	if err := d.AddNovel("scene1", MainBranch, "", false); err == nil {
+	err := d.AddNovel("scene1", MainBranch, "", false)
+	if err == nil {
 		t.Fatal("expected duplicate novel on same branch")
+	}
+	var reg *RegistrationError
+	if !errors.As(err, &reg) {
+		t.Fatalf("expected RegistrationError, got %T: %v", err, err)
 	}
 }
 

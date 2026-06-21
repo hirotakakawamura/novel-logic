@@ -169,6 +169,31 @@ func TestAddBranchRemoveBranch(t *testing.T) {
 	}
 }
 
+func TestBranchIssuesNovelDuplicateMessage(t *testing.T) {
+	d := newTestProject(t)
+	meta := NovelMeta{
+		SceneID: "scene1", Branch: MainBranch,
+		TimeStart: "t1", TimeEnd: "t2",
+		BodyPath: DefaultNovelBodyPath("scene1", MainBranch),
+	}
+	d.Novels = append(d.Novels, meta, meta)
+	issues := BranchIssues(d)
+	var found *BranchIssue
+	for i := range issues {
+		if issues[i].Code == "novel.duplicate" {
+			found = &issues[i]
+			break
+		}
+	}
+	if found == nil {
+		t.Fatalf("expected novel.duplicate, got %v", issues)
+	}
+	want := `duplicate novel: scene "scene1" on branch "main" registered twice`
+	if found.Message != want {
+		t.Fatalf("message = %q, want %q", found.Message, want)
+	}
+}
+
 func TestBranchIssuesUnknownBranch(t *testing.T) {
 	d := newTestProject(t)
 	// AddFact rejects unknown branches; inject invalid state to exercise BranchIssues.
