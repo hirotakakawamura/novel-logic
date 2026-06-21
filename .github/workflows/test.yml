@@ -38,7 +38,7 @@ jobs:
           awk -v t="$total" -v m="$MIN_COVERAGE" 'BEGIN { if (t+0 < m+0) { print "coverage below threshold"; exit 1 } }'
 
       - name: Upload coverage profile
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage
           retention-days: 7
