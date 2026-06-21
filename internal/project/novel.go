@@ -55,7 +55,7 @@ func validateNovelBodyPath(root, bodyPath string) error {
 
 func duplicateNovelError(sceneID, branch string) error {
 	branch = NormalizeBranch(branch)
-	return fmt.Errorf(
+	return registrationErrorf(
 		"novel for scene %q on branch %q already registered; use: novel-logic novel update %s --branch %s",
 		sceneID, branch, sceneID, branch,
 	)

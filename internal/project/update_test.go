@@ -55,6 +55,22 @@ func TestSetPlot(t *testing.T) {
 	}
 }
 
+func TestUpdateFactRejectsPromotionViaUpdate(t *testing.T) {
+	d := newTestProject(t)
+	fixed, err := d.AddFact(FactFixed, "ally", "companion", "plot", MainBranch)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = d.UpdateFact(fixed.ID, FactState, "ally", "companion", "plot")
+	if err == nil {
+		t.Fatal("expected promotion-via-update error")
+	}
+	var reg *RegistrationError
+	if !errors.As(err, &reg) {
+		t.Fatalf("expected RegistrationError, got %T: %v", err, err)
+	}
+}
+
 func TestUpdateFactRejectsDemotion(t *testing.T) {
 	d := newTestProject(t)
 	if err := d.UpdateFact("fact1", FactState, "hero", "origin", "plot"); err != nil {

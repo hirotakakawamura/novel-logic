@@ -49,6 +49,9 @@ func (d *Data) UpdateFact(id string, kind FactKind, thing, pred, scope string) e
 	if f.Kind == FactState && kind == FactFixed {
 		return registrationErrorf("cannot demote state fact %q to fixed; fixed→state promotion uses: novel-logic fact promote %s", id, id)
 	}
+	if f.Kind == FactFixed && kind == FactState {
+		return registrationErrorf("cannot promote fixed fact %q via update; use: novel-logic fact promote %s", id, id)
+	}
 	if thing == "" || pred == "" {
 		return fmt.Errorf("thing and pred are required")
 	}
