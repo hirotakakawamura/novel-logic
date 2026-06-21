@@ -21,9 +21,7 @@ func TestIsGitRepo(t *testing.T) {
 
 func TestResolveGitFileState(t *testing.T) {
 	dir := newTestProject(t).Root
-	runGitTest(t, dir, "init")
-	runGitTest(t, dir, "config", "user.email", "test@example.com")
-	runGitTest(t, dir, "config", "user.name", "Test User")
+	gitInitTestRepo(t, dir)
 
 	bodyRel := DefaultNovelBodyPath("scene1", MainBranch)
 	bodyPath := filepath.Join(dir, bodyRel)
@@ -33,8 +31,7 @@ func TestResolveGitFileState(t *testing.T) {
 	if err := os.WriteFile(bodyPath, []byte("first draft\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	runGitTest(t, dir, "add", ".")
-	runGitTest(t, dir, "commit", "-m", "add novel body")
+	gitCommitAllTest(t, dir, "add novel body")
 
 	state, err := ResolveGitFileState(dir, bodyRel)
 	if err != nil {
@@ -69,9 +66,7 @@ func TestResolveGitFileStateNotGitRepo(t *testing.T) {
 
 func TestResolveGitFileStateUntracked(t *testing.T) {
 	dir := newTestProject(t).Root
-	runGitTest(t, dir, "init")
-	runGitTest(t, dir, "config", "user.email", "test@example.com")
-	runGitTest(t, dir, "config", "user.name", "Test User")
+	gitInitTestRepo(t, dir)
 
 	bodyRel := DefaultNovelBodyPath("scene1", MainBranch)
 	bodyPath := filepath.Join(dir, bodyRel)
@@ -86,6 +81,19 @@ func TestResolveGitFileStateUntracked(t *testing.T) {
 	if err == nil || !strings.Contains(err.Error(), "not tracked") {
 		t.Fatalf("err = %v", err)
 	}
+}
+
+func gitInitTestRepo(t *testing.T, dir string) {
+	t.Helper()
+	runGitTest(t, dir, "init")
+	runGitTest(t, dir, "config", "user.email", "test@example.com")
+	runGitTest(t, dir, "config", "user.name", "Test User")
+}
+
+func gitCommitAllTest(t *testing.T, dir, msg string) {
+	t.Helper()
+	runGitTest(t, dir, "add", ".")
+	runGitTest(t, dir, "commit", "-m", msg)
 }
 
 func runGitTest(t *testing.T, dir string, args ...string) {

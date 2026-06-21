@@ -5,8 +5,13 @@ import (
 	"errors"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 
 	"novel-logic/internal/testfixture"
 )
@@ -18,6 +23,25 @@ func resetCLIGlobals() {
 	checkQuick = false
 	checkNoGenerate = false
 	checkJobs = 0
+	// rootCmd is a package-global cobra tree; flags persist across Execute calls unless reset.
+	resetCLIFlags(rootCmd)
+}
+
+func resetCLIFlags(cmd *cobra.Command) {
+	cmd.Flags().VisitAll(resetFlagValue)
+	cmd.PersistentFlags().VisitAll(resetFlagValue)
+	for _, c := range cmd.Commands() {
+		resetCLIFlags(c)
+	}
+}
+
+func resetFlagValue(f *pflag.Flag) {
+	f.Changed = false
+	if sv, ok := f.Value.(pflag.SliceValue); ok {
+		_ = sv.Replace(nil)
+		return
+	}
+	_ = f.Value.Set(f.DefValue)
 }
 
 func runCLI(t *testing.T, args ...string) (stdout string, exitCode int) {
@@ -70,6 +94,30 @@ func runCLI(t *testing.T, args ...string) (stdout string, exitCode int) {
 
 func writeCLIProject(t *testing.T) string {
 	return testfixture.WriteMinimalDir(t)
+}
+
+func gitInit(t *testing.T, dir string) {
+	t.Helper()
+	runGitCLI(t, dir, "init")
+	runGitCLI(t, dir, "config", "user.email", "test@example.com")
+	runGitCLI(t, dir, "config", "user.name", "Test User")
+	gitCommitAll(t, dir, "init")
+}
+
+func gitCommitAll(t *testing.T, dir, msg string) {
+	t.Helper()
+	runGitCLI(t, dir, "add", ".")
+	runGitCLI(t, dir, "commit", "-m", msg)
+}
+
+func runGitCLI(t *testing.T, dir string, args ...string) {
+	t.Helper()
+	cmd := exec.Command("git", args...)
+	cmd.Dir = dir
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("git %s: %v\n%s", strings.Join(args, " "), err, out)
+	}
 }
 
 func copyWalkthroughProject(t *testing.T) string {
