@@ -87,28 +87,19 @@ func genFacts(d *project.Data) string {
 	ns := namespace(d)
 	var b strings.Builder
 	fmt.Fprintf(&b, "import Core\nimport Project\n\nnamespace %s\n\nopen NovelLogic\n\n", ns)
-	fmt.Fprintf(&b, "def allFixedFacts : List (FixedFact ThingId PredId Scope) := [\n")
-	for _, f := range d.Facts {
-		if f.Kind != project.FactFixed {
-			continue
-		}
-		fmt.Fprintf(&b, "  ⟨ThingId.%s, PredId.%s, %s⟩,\n", leanIdent(f.Thing), leanPred(f.Pred), scopeExpr(f.Scope))
+	bids := branchIDs(d)
+	for _, bid := range bids {
+		writeBranchFactLists(&b, d, bid)
 	}
-	fmt.Fprintf(&b, "]\n\n")
-	fmt.Fprintf(&b, "def allStateDecls : List (StateDecl ThingId PredId Scope) := [\n")
-	for _, f := range d.Facts {
-		if f.Kind != project.FactState {
-			continue
-		}
-		fmt.Fprintf(&b, "  ⟨ThingId.%s, PredId.%s, %s⟩,\n", leanIdent(f.Thing), leanPred(f.Pred), scopeExpr(f.Scope))
-	}
-	fmt.Fprintf(&b, "]\n\n")
+	mainIdent := leanIdent(project.MainBranch)
+	fmt.Fprintf(&b, "abbrev allFixedFacts := fixedFacts_%s\n\n", mainIdent)
+	fmt.Fprintf(&b, "abbrev allStateDecls := stateDecls_%s\n\n", mainIdent)
 	fmt.Fprintf(&b, "def allActions : List (ActionDecl ThingId PredId TimeId Scope) := [\n")
 	for _, a := range d.Actions {
 		fmt.Fprintf(&b, "  %s,\n", actionDeclExpr(a))
 	}
 	fmt.Fprintf(&b, "]\n\n")
-	for _, bid := range branchIDs(d) {
+	for _, bid := range bids {
 		ident := leanIdent(bid)
 		acts := d.ActiveActions(bid)
 		fmt.Fprintf(&b, "def activeActions_%s : List (ActionDecl ThingId PredId TimeId Scope) := [\n", ident)
@@ -117,10 +108,31 @@ func genFacts(d *project.Data) string {
 		}
 		fmt.Fprintf(&b, "]\n\n")
 		fmt.Fprintf(&b, "def evolveBranch_%s (t : TimeId) (thing : ThingId) : List PredId :=\n", ident)
-		fmt.Fprintf(&b, "  predsAt allFixedFacts allStateDecls activeActions_%s timeOrder t thing\n\n", ident)
+		fmt.Fprintf(&b, "  predsAt fixedFacts_%s stateDecls_%s activeActions_%s timeOrder t thing\n\n", ident, ident, ident)
 	}
 	fmt.Fprintf(&b, "end %s\n", ns)
 	return b.String()
+}
+
+func writeBranchFactLists(b *strings.Builder, d *project.Data, branchID string) {
+	ident := leanIdent(branchID)
+	facts := d.EffectiveFactsOnBranch(branchID)
+	fmt.Fprintf(b, "def fixedFacts_%s : List (FixedFact ThingId PredId Scope) := [\n", ident)
+	for _, f := range facts {
+		if f.Kind != project.FactFixed {
+			continue
+		}
+		fmt.Fprintf(b, "  ⟨ThingId.%s, PredId.%s, %s⟩,\n", leanIdent(f.Thing), leanPred(f.Pred), scopeExpr(f.Scope))
+	}
+	fmt.Fprintf(b, "]\n\n")
+	fmt.Fprintf(b, "def stateDecls_%s : List (StateDecl ThingId PredId Scope) := [\n", ident)
+	for _, f := range facts {
+		if f.Kind != project.FactState {
+			continue
+		}
+		fmt.Fprintf(b, "  ⟨ThingId.%s, PredId.%s, %s⟩,\n", leanIdent(f.Thing), leanPred(f.Pred), scopeExpr(f.Scope))
+	}
+	fmt.Fprintf(b, "]\n\n")
 }
 
 func genRules(d *project.Data) string {
@@ -173,36 +185,41 @@ func genTheorems(d *project.Data) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "import Core\nimport Project\nimport Facts\nimport Rules\nimport Timeline\n\nnamespace %s\n\n", ns)
 	fmt.Fprintf(&b, "open NovelLogic\n\n")
+	mainIdent := leanIdent(project.MainBranch)
 	fmt.Fprintf(&b, "theorem actions_in_scene_window :\n")
-	fmt.Fprintf(&b, "    allActionsInSceneWindows sceneWindows timeOrder allActions scopeToScene := by\n")
+	fmt.Fprintf(&b, "    allActionsInSceneWindows sceneWindows timeOrder activeActions_%s scopeToScene := by\n", mainIdent)
 	fmt.Fprintf(&b, "  native_decide\n\n")
 	fmt.Fprintf(&b, "theorem no_forbidden_states :\n")
-	fmt.Fprintf(&b, "    noForbiddenStatesRegistered projectRules allStateDecls := by\n")
+	fmt.Fprintf(&b, "    noForbiddenStatesRegistered projectRules stateDecls_%s := by\n", mainIdent)
 	fmt.Fprintf(&b, "  native_decide\n\n")
 	fmt.Fprintf(&b, "theorem no_forbidden_transitions :\n")
-	fmt.Fprintf(&b, "    allActionsRespectRules projectRules allActions := by\n")
+	fmt.Fprintf(&b, "    allActionsRespectRules projectRules activeActions_%s := by\n", mainIdent)
 	fmt.Fprintf(&b, "  native_decide\n\n")
 	fmt.Fprintf(&b, "theorem fixed_facts_stable :\n")
-	fmt.Fprintf(&b, "    fixedFactsStable allFixedFacts allStateDecls allActions timeOrder := by\n")
+	fmt.Fprintf(&b, "    fixedFactsStable fixedFacts_%s stateDecls_%s activeActions_%s timeOrder := by\n", mainIdent, mainIdent, mainIdent)
 	fmt.Fprintf(&b, "  native_decide\n\n")
 	for _, bid := range branchIDs(d) {
 		ident := leanIdent(bid)
 		fmt.Fprintf(&b, "theorem actions_in_scene_window_%s :\n", ident)
 		fmt.Fprintf(&b, "    allActionsInSceneWindows sceneWindows timeOrder activeActions_%s scopeToScene := by\n", ident)
 		fmt.Fprintf(&b, "  native_decide\n\n")
+		fmt.Fprintf(&b, "theorem no_forbidden_states_%s :\n", ident)
+		fmt.Fprintf(&b, "    noForbiddenStatesRegistered projectRules_%s stateDecls_%s := by\n", ident, ident)
+		fmt.Fprintf(&b, "  native_decide\n\n")
 		fmt.Fprintf(&b, "theorem no_forbidden_transitions_%s :\n", ident)
 		fmt.Fprintf(&b, "    allActionsRespectRules projectRules_%s activeActions_%s := by\n", ident, ident)
 		fmt.Fprintf(&b, "  native_decide\n\n")
 		fmt.Fprintf(&b, "theorem fixed_facts_stable_%s :\n", ident)
-		fmt.Fprintf(&b, "    fixedFactsStable allFixedFacts allStateDecls activeActions_%s timeOrder := by\n", ident)
+		fmt.Fprintf(&b, "    fixedFactsStable fixedFacts_%s stateDecls_%s activeActions_%s timeOrder := by\n", ident, ident, ident)
 		fmt.Fprintf(&b, "  native_decide\n\n")
 	}
 	for _, r := range d.Rules {
 		if r.Kind == project.RuleForbidState && lastTime != "" {
-			fmt.Fprintf(&b, "theorem forbid_state_%s_%s_at_end :\n",
-				leanIdent(r.Thing), leanPred(r.Pred))
-			fmt.Fprintf(&b, "    ¬ listContains (predsAt allFixedFacts allStateDecls allActions timeOrder TimeId.%s ThingId.%s) PredId.%s := by\n",
-				leanIdent(lastTime), leanIdent(r.Thing), leanPred(r.Pred))
+			bid := leanIdent(project.NormalizeBranch(r.Branch))
+			fmt.Fprintf(&b, "theorem forbid_state_%s_%s_%s_at_end :\n",
+				bid, leanIdent(r.Thing), leanPred(r.Pred))
+			fmt.Fprintf(&b, "    ¬ listContains (predsAt fixedFacts_%s stateDecls_%s activeActions_%s timeOrder TimeId.%s ThingId.%s) PredId.%s := by\n",
+				bid, bid, bid, leanIdent(lastTime), leanIdent(r.Thing), leanPred(r.Pred))
 			fmt.Fprintf(&b, "  native_decide\n\n")
 		}
 	}
@@ -353,8 +370,8 @@ var predRomanization = map[string]string{
 	"野良":    "nora",
 	"仲間":    "nakama",
 	"健在":    "kenzen",
-	"退治済み":   "taijizumi",
-	"鬼退治済み":  "onitaijizumi",
+	"退治済み":  "taijizumi",
+	"鬼退治済み": "onitaijizumi",
 }
 
 func leanPred(pred string) string {

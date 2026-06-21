@@ -99,7 +99,7 @@ plot
 |--------|------|
 | 構造の類似 | fixed_fact と state は同じ「A は B である」形式 |
 | **昇格** | fixed_fact として定義したものを **後から state に変更できる** |
-| **降格** | state を fixed_fact に変更することは **できない** |
+| **降格** | state を fixed_fact に変更することは **できない**（`fact update --kind fixed` も拒否） |
 
 ### 3.3 thing 間の関係の表現
 

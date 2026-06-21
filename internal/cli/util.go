@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -30,6 +31,10 @@ func requireValidate(d *project.Data) error {
 
 func saveValidated(d *project.Data, mutate func() error) error {
 	if err := mutate(); err != nil {
+		var reg *project.RegistrationError
+		if errors.As(err, &reg) {
+			return exitErr(1, err)
+		}
 		return exitErr(4, err)
 	}
 	if err := requireValidate(d); err != nil {
