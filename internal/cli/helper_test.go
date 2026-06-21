@@ -133,6 +133,13 @@ func lastActionID(t *testing.T, dir string) string {
 	return d.Actions[len(d.Actions)-1].ID
 }
 
+func mustOK(t *testing.T, dir string, args ...string) {
+	t.Helper()
+	if _, code := runCLI(t, append([]string{"-C", dir}, args...)...); code != 0 {
+		t.Fatalf("command failed: %v (exit %d)", args, code)
+	}
+}
+
 func copyWalkthroughProject(t *testing.T) string {
 	t.Helper()
 	src := filepath.Join("..", "..", "examples", "momotaro-walkthrough")

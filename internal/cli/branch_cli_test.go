@@ -29,14 +29,8 @@ func TestBranchShow(t *testing.T) {
 
 func TestBranchRemoveRejectsChildBranch(t *testing.T) {
 	dir := writeCLIProject(t)
-	mustOK := func(args ...string) {
-		t.Helper()
-		if _, code := runCLI(t, append([]string{"-C", dir}, args...)...); code != 0 {
-			t.Fatalf("failed: %v", args)
-		}
-	}
-	mustOK("branch", "add", "sub", "--parent", "main", "--label", "sub")
-	mustOK("branch", "add", "leaf", "--parent", "sub", "--label", "leaf")
+	mustOK(t, dir, "branch", "add", "sub", "--parent", "main", "--label", "sub")
+	mustOK(t, dir, "branch", "add", "leaf", "--parent", "sub", "--label", "leaf")
 
 	_, code := runCLI(t, "-C", dir, "branch", "remove", "sub")
 	if code != 4 {
@@ -51,25 +45,18 @@ func TestBranchRemoveRejectsChildBranch(t *testing.T) {
 func TestForkMergeCLIEndToEnd(t *testing.T) {
 	dir := writeCLIProject(t)
 
-	mustOK := func(args ...string) {
-		t.Helper()
-		if _, code := runCLI(t, append([]string{"-C", dir}, args...)...); code != 0 {
-			t.Fatalf("command failed: %v (exit %d)", args, code)
-		}
-	}
-
-	mustOK("fork", "add", "fork1", "--parent", "main", "--at", "t2")
-	mustOK("action", "add", "--thing", "hero", "--from", "mid", "--to", "route_a", "--at", "t2", "--label", "fork")
+	mustOK(t, dir, "fork", "add", "fork1", "--parent", "main", "--at", "t2")
+	mustOK(t, dir, "action", "add", "--thing", "hero", "--from", "mid", "--to", "route_a", "--at", "t2", "--label", "fork")
 
 	forkAct := lastActionID(t, dir)
-	mustOK("fork", "choice", "add", "--fork", "fork1", "--action", forkAct, "--branch", "branch_a")
+	mustOK(t, dir, "fork", "choice", "add", "--fork", "fork1", "--action", forkAct, "--branch", "branch_a")
 
-	mustOK("action", "add", "--thing", "hero", "--from", "route_a", "--to", "merged", "--at", "t3", "--branch", "branch_a")
+	mustOK(t, dir, "action", "add", "--thing", "hero", "--from", "route_a", "--to", "merged", "--at", "t3", "--branch", "branch_a")
 	actA := lastActionID(t, dir)
-	mustOK("action", "add", "--thing", "hero", "--from", "mid", "--to", "merged", "--at", "t3", "--branch", "main")
+	mustOK(t, dir, "action", "add", "--thing", "hero", "--from", "mid", "--to", "merged", "--at", "t3", "--branch", "main")
 	actMain := lastActionID(t, dir)
 
-	mustOK("merge", "add", "merge1", "--at", "t3", "--into", "main",
+	mustOK(t, dir, "merge", "add", "merge1", "--at", "t3", "--into", "main",
 		"--choice", "branch_a:"+actA, "--choice", "main:"+actMain)
 
 	out, code := runCLI(t, "-C", dir, "validate")
