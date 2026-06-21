@@ -1,6 +1,9 @@
 package project
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func TestNewIDSkipsExisting(t *testing.T) {
 	existing := map[string]bool{"fact1": true}
@@ -50,6 +53,18 @@ func TestAddThingValidationErrors(t *testing.T) {
 		if err := tc.fn(); err == nil {
 			t.Fatalf("%s: expected error", tc.name)
 		}
+	}
+}
+
+func TestAddTimeDuplicateReturnsRegistrationError(t *testing.T) {
+	d := newTestProject(t)
+	err := d.AddTime("t1", "")
+	if err == nil {
+		t.Fatal("expected duplicate time error")
+	}
+	var reg *RegistrationError
+	if !errors.As(err, &reg) {
+		t.Fatalf("expected RegistrationError, got %T: %v", err, err)
 	}
 }
 
@@ -166,6 +181,31 @@ func TestAddBranchRemoveBranch(t *testing.T) {
 	}
 	if err := d.RemoveBranch(MainBranch); err == nil {
 		t.Fatal("cannot remove main")
+	}
+}
+
+func TestBranchIssuesNovelDuplicateMessage(t *testing.T) {
+	d := newTestProject(t)
+	meta := NovelMeta{
+		SceneID: "scene1", Branch: MainBranch,
+		TimeStart: "t1", TimeEnd: "t2",
+		BodyPath: DefaultNovelBodyPath("scene1", MainBranch),
+	}
+	d.Novels = append(d.Novels, meta, meta)
+	issues := BranchIssues(d)
+	var found *BranchIssue
+	for i := range issues {
+		if issues[i].Code == "novel.duplicate" {
+			found = &issues[i]
+			break
+		}
+	}
+	if found == nil {
+		t.Fatalf("expected novel.duplicate, got %v", issues)
+	}
+	want := `duplicate novel: scene "scene1" on branch "main" registered twice`
+	if found.Message != want {
+		t.Fatalf("message = %q, want %q", found.Message, want)
 	}
 }
 

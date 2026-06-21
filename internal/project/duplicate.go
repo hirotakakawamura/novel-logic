@@ -136,6 +136,10 @@ func duplicateThingError(id string) error {
 	)
 }
 
+func duplicateTimeError(id string) error {
+	return registrationErrorf("duplicate time %q already registered", id)
+}
+
 func formatFactKey(kind FactKind, thing, pred, scope string) string {
 	return fmt.Sprintf("kind=%s thing=%s pred=%s scope=%s", kind, thing, pred, normalizeScope(scope))
 }

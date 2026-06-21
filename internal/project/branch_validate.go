@@ -144,16 +144,17 @@ func BranchIssues(d *Data) []BranchIssue {
 		}
 	}
 
-	seenNovels := map[string]string{}
+	seenNovels := map[string]bool{}
 	for _, n := range d.Novels {
 		key := NovelKey(n.SceneID, n.Branch)
-		if prev, ok := seenNovels[key]; ok {
+		if seenNovels[key] {
 			issues = append(issues, BranchIssue{
 				Code:    "novel.duplicate",
-				Message: fmt.Sprintf("duplicate novel: scene %q branch %q (%s and %s)", n.SceneID, NormalizeBranch(n.Branch), prev, key),
+				Message: fmt.Sprintf("duplicate novel: scene %q on branch %q registered twice", n.SceneID, NormalizeBranch(n.Branch)),
 			})
+			continue
 		}
-		seenNovels[key] = n.SceneID
+		seenNovels[key] = true
 	}
 
 	issues = append(issues, d.BranchIsolatedStateIssues()...)

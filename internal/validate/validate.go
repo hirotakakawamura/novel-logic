@@ -40,6 +40,9 @@ func globalIssues(d *project.Data) []Issue {
 	for _, msg := range project.DuplicateIssues(d) {
 		issues = append(issues, Issue{"duplicate", msg})
 	}
+	for _, msg := range project.TimeRegistryIssues(d) {
+		issues = append(issues, Issue{"time.registry_mismatch", msg})
+	}
 	for _, bi := range project.BranchIssues(d) {
 		issues = append(issues, Issue{bi.Code, bi.Message})
 	}

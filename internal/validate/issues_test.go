@@ -134,6 +134,20 @@ func TestRunIssueCodes(t *testing.T) {
 			wantCode: "branch.unknown",
 		},
 		{
+			name: "time_registry_mismatch",
+			mutate: func(d *project.Data) {
+				d.Meta.TimeOrder = append(d.Meta.TimeOrder, "ghost_time")
+			},
+			wantCode: "time.registry_mismatch",
+		},
+		{
+			name: "time_registry_duplicate_in_yaml",
+			mutate: func(d *project.Data) {
+				d.Times = append(d.Times, project.TimeEntry{ID: d.Times[0].ID})
+			},
+			wantCode: "time.registry_mismatch",
+		},
+		{
 			name: "novel_unknown_scene",
 			mutate: func(d *project.Data) {
 				d.Novels = append(d.Novels, project.NovelMeta{

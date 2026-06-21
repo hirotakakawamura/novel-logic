@@ -10,9 +10,19 @@
 
 **CLI 体系（確定）**: サブコマンド型が正。対話ウィザード（`novel-logic wizard`）は Phase 1 の補助（[REQUIREMENTS §8.1](REQUIREMENTS.md)）。
 
+**用語（YAML / CLI）**: ドキュメント上の概念名 `fixed_fact` は、YAML と CLI では **`kind: fixed`** と書く（`state` も同様）。
+
 ---
 
 ## 0. 共通仕様
+
+### 0.0 用語集（混同しやすい語）
+
+| 語 | 意味 |
+|----|------|
+| **branch**（`branches.yaml`） | 物語のルート分岐 ID（`main`, `branch_a` 等） |
+| **revision pin**（`novel revision pin`） | 本文ファイルの **git commit** を `novels.yaml` に記録する操作 |
+| **git branch** | ツール外の VCS 概念（作品データの履歴管理） |
 
 ### 0.1 実行コンテキスト
 
@@ -39,7 +49,7 @@ plot / novel 二層のデータ操作で使う。
 | コード | 意味 |
 |--------|------|
 | `0` | 成功 |
-| `1` | Stage 1 検証エラー、登録拒否（重複 ID、rule 抵触、state→fixed 降格、merge 後の branch 登録拒否等） |
+| `1` | Stage 1 検証エラー、登録拒否（重複 ID（thing / fact / action / time / novel 等）、rule 抵触、fact 昇格/降格の不正経路、merge 後の branch 登録拒否、`time.registry_mismatch` 等） |
 | `2` | Lean 生成エラー |
 | `3` | Stage 2（`lake build`）失敗 |
 | `4` | ユーザー入力・引数エラー（未知 ID、remove 拒否、必須フラグ不足等） |
@@ -181,7 +191,7 @@ thing 一覧・詳細（**tag**、紐づく fixed_fact / state 件数）。
 
 ### `novel-logic time list`
 
-登録済み time ID と順序（`times.yaml` の order）。
+登録済み time ID と順序。**表示順は `project.yaml` の `time_order`**（正本）。`times.yaml` は ID の存在レジストリ。両者の乖離は Stage 1 の `time.registry_mismatch` で検出する。
 
 ---
 
@@ -280,7 +290,7 @@ scene を登録（A3）。
 
 ### `novel-logic time add <id>`
 
-time を順序付きで登録（scene / action の前提）。
+time を順序付きで登録（scene / action の前提）。**重複 ID は拒否（exit 1）**。
 
 | フラグ | 必須 | 説明 |
 |--------|------|------|
@@ -316,11 +326,13 @@ novel-logic fact add --kind state --thing momotaro --pred 犬仲間あり --bran
 |--------|------|
 | `--kind` / `--thing` / `--pred` / `--scope` | 指定した項目のみ更新 |
 
+**`kind` の変更**: `fixed` ↔ `state` の昇格・降格は **`fact update --kind` では不可**（拒否時 exit 1）。昇格は `fact promote`、降格は不可（[REQUIREMENTS §3.2](REQUIREMENTS.md)）。
+
 ---
 
 ### `novel-logic fact promote <id>`
 
-fixed_fact を state に昇格（降格は不可 — REQUIREMENTS §3.2）。
+`kind: fixed` の fact を `state` に昇格する正規経路（降格は不可 — REQUIREMENTS §3.2）。
 
 ---
 
@@ -426,7 +438,9 @@ novel-logic novel add scene4 --branch branch_dog   # → novels/branch_dog/scene
 
 scene に紐づく novel メタを登録（B1）。デフォルトで空の `novels/<branch>/<scene_id>.txt` を作成。
 
-**cardinality（確定）**: **1 scene × 1 branch : 1 novel**。同一 branch で再登録はエラー（[REQUIREMENTS §3.6](REQUIREMENTS.md)）。
+**cardinality（確定）**: **1 scene × 1 branch : 1 novel**。同一 branch で再登録は **登録拒否（exit 1）**（[REQUIREMENTS §3.6](REQUIREMENTS.md)）。
+
+**重複メッセージの違い**: `novel add` の再登録は `novel for scene … already registered`（CLI 操作時）。`novels.yaml` に同一 `(scene, branch)` が二重に存在する場合は `validate` が `novel.duplicate`（`duplicate novel: scene … registered twice`）を報告する。後者は手編集 YAML の整合チェック用。
 
 | フラグ | 必須 | 説明 |
 |--------|------|------|
@@ -513,14 +527,25 @@ novel-logic novel remove <scene_id>    # デフォルト --keep-body
 **Stage 1 のみ**。作品データ全体の構造・制約を検証。Lean 不要。
 
 - スキーマ・参照 ID
-- time 順序・scene / novel 区間
+- time 順序・`time_order` と `times.yaml` の整合（`time.registry_mismatch` — 欠落・重複・空 ID）
+- scene / novel 区間
 - rule / fact / action の抵触（**branch ごとの有効 action**）
 - fork / merge 整合、`branch.isolated_state`
 - tag 形式
+- **hints**（`action.plot_scene_hint` 等）— 存在時または `--verbose` で表示
 
 | フラグ | 説明 |
 |--------|------|
 | `--branch <id>` | 単一 branch のみ検証（省略時: 全 branch） |
+
+**`validate` と `check --quick` の違い**
+
+| | `validate` | `check --quick` |
+|---|------------|-----------------|
+| Stage 1 | ○ | ○ |
+| hints 表示 | ○ | なし |
+| `last_check` 更新 | なし | ○ |
+| Lean | 不要 | 不要 |
 
 ---
 

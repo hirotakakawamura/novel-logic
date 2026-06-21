@@ -9,6 +9,17 @@ import (
 	"novel-logic/internal/project"
 )
 
+func TestNovelAddDuplicateExits1(t *testing.T) {
+	dir := writeCLIProject(t)
+	if _, code := runCLI(t, "-C", dir, "novel", "add", "scene1", "--init"); code != 0 {
+		t.Fatalf("first add exit %d", code)
+	}
+	_, code := runCLI(t, "-C", dir, "novel", "add", "scene1", "--init")
+	if code != 1 {
+		t.Fatalf("duplicate add exit %d, want 1", code)
+	}
+}
+
 func TestNovelListEmpty(t *testing.T) {
 	dir := writeCLIProject(t)
 	out, code := runCLI(t, "-C", dir, "novel", "list")
