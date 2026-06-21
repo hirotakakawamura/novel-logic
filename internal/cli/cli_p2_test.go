@@ -2,7 +2,6 @@ package cli
 
 import (
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -126,6 +125,11 @@ func TestNovelRevisionPinCLI(t *testing.T) {
 	if code != 0 || !strings.Contains(out, "current:") {
 		t.Fatalf("list exit %d, output=%q", code, out)
 	}
+
+	out, code = runCLI(t, "-C", dir, "novel", "show", "scene1")
+	if code != 0 || !strings.Contains(out, "pinned_commit:") {
+		t.Fatalf("show exit %d, output=%q", code, out)
+	}
 }
 
 func TestCheckStage2FailsOnBrokenLean(t *testing.T) {
@@ -148,26 +152,3 @@ func TestCheckStage2FailsOnBrokenLean(t *testing.T) {
 	}
 }
 
-func gitInit(t *testing.T, dir string) {
-	t.Helper()
-	runGitCLI(t, dir, "init")
-	runGitCLI(t, dir, "config", "user.email", "test@example.com")
-	runGitCLI(t, dir, "config", "user.name", "Test User")
-	gitCommitAll(t, dir, "init")
-}
-
-func gitCommitAll(t *testing.T, dir, msg string) {
-	t.Helper()
-	runGitCLI(t, dir, "add", ".")
-	runGitCLI(t, dir, "commit", "-m", msg)
-}
-
-func runGitCLI(t *testing.T, dir string, args ...string) {
-	t.Helper()
-	cmd := exec.Command("git", args...)
-	cmd.Dir = dir
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		t.Fatalf("git %s: %v\n%s", strings.Join(args, " "), err, out)
-	}
-}

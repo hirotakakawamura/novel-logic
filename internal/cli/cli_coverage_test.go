@@ -9,11 +9,11 @@ import (
 
 func TestNovelListAndShow(t *testing.T) {
 	dir := writeCLIProject(t)
-	gitInitCLI(t, dir)
+	gitInit(t, dir)
 	if _, code := runCLI(t, "-C", dir, "novel", "add", "scene1", "--init"); code != 0 {
 		t.Fatal("novel add failed")
 	}
-	gitCommitCLI(t, dir, "add novel")
+	gitCommitAll(t, dir, "add novel")
 
 	out, code := runCLI(t, "-C", dir, "novel", "list")
 	if code != 0 || !strings.Contains(out, "scene1") {
@@ -29,23 +29,6 @@ func TestNovelListAndShow(t *testing.T) {
 	}
 	if !strings.Contains(out, "alignment:") {
 		t.Fatalf("output=%q", out)
-	}
-}
-
-func TestNovelShowWithPinnedRevision(t *testing.T) {
-	dir := writeCLIProject(t)
-	gitInitCLI(t, dir)
-	if _, code := runCLI(t, "-C", dir, "novel", "add", "scene1", "--init"); code != 0 {
-		t.Fatal("novel add failed")
-	}
-	gitCommitCLI(t, dir, "add novel")
-	if _, code := runCLI(t, "-C", dir, "novel", "revision", "pin", "scene1"); code != 0 {
-		t.Fatal("pin failed")
-	}
-
-	out, code := runCLI(t, "-C", dir, "novel", "show", "scene1")
-	if code != 0 || !strings.Contains(out, "pinned_commit:") {
-		t.Fatalf("show exit %d, output=%q", code, out)
 	}
 }
 
@@ -107,20 +90,6 @@ func TestSceneShowWithNovelLayer(t *testing.T) {
 	}
 }
 
-func gitInitCLI(t *testing.T, dir string) {
-	t.Helper()
-	runGitCLI(t, dir, "init")
-	runGitCLI(t, dir, "config", "user.email", "test@example.com")
-	runGitCLI(t, dir, "config", "user.name", "Test User")
-	gitCommitCLI(t, dir, "init")
-}
-
-func gitCommitCLI(t *testing.T, dir, msg string) {
-	t.Helper()
-	runGitCLI(t, dir, "add", ".")
-	runGitCLI(t, dir, "commit", "-m", msg)
-}
-
 func TestNovelListEmpty(t *testing.T) {
 	dir := writeCLIProject(t)
 	out, code := runCLI(t, "-C", dir, "novel", "list")
@@ -129,8 +98,7 @@ func TestNovelListEmpty(t *testing.T) {
 	}
 }
 
-// Ensure git helpers work when body path uses slash form.
-func TestNovelShowBodyPath(t *testing.T) {
+func TestNovelShowBodyTruncation(t *testing.T) {
 	dir := writeCLIProject(t)
 	if _, code := runCLI(t, "-C", dir, "novel", "add", "scene1", "--init"); code != 0 {
 		t.Fatal("novel add failed")

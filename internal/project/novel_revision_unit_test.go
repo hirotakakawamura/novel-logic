@@ -3,6 +3,7 @@ package project
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -53,15 +54,26 @@ func TestNovelRevisionIssuesOnDriftAndDirty(t *testing.T) {
 	if err := os.WriteFile(body, []byte("edited\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if issues := NovelRevisionIssues(d); len(issues) == 0 {
-		t.Fatal("expected dirty or drift issue")
+	issues := NovelRevisionIssues(d)
+	if !issueContains(issues, "uncommitted changes") {
+		t.Fatalf("expected dirty issue, got %v", issues)
 	}
 
 	runGitTest(t, dir, "add", body)
 	runGitTest(t, dir, "commit", "-m", "v2")
-	if issues := NovelRevisionIssues(d); len(issues) == 0 {
-		t.Fatal("expected revision drift issue")
+	issues = NovelRevisionIssues(d)
+	if !issueContains(issues, "pinned revision") || !issueContains(issues, "differs from latest git commit") {
+		t.Fatalf("expected drift issue, got %v", issues)
 	}
+}
+
+func issueContains(issues []string, sub string) bool {
+	for _, iss := range issues {
+		if strings.Contains(iss, sub) {
+			return true
+		}
+	}
+	return false
 }
 
 func TestPinNovelRevisionRejectsDirty(t *testing.T) {

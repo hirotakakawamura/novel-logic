@@ -171,9 +171,19 @@ func TestAddBranchRemoveBranch(t *testing.T) {
 
 func TestBranchIssuesUnknownBranch(t *testing.T) {
 	d := newTestProject(t)
-	d.Facts[0].Branch = "ghost"
+	d.Facts = append(d.Facts, Fact{
+		ID: "fact_orphan", Kind: FactState, Thing: "hero", Pred: "lost",
+		Scope: "plot", Branch: "nonexistent_branch",
+	})
 	issues := BranchIssues(d)
-	if len(issues) == 0 {
-		t.Fatal("expected branch issue")
+	found := false
+	for _, iss := range issues {
+		if iss.Code == "branch.unknown" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("expected branch.unknown, got %v", issues)
 	}
 }
