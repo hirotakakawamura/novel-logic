@@ -343,8 +343,8 @@ action を登録（A5）。
 | フラグ | 必須 | 説明 |
 |--------|------|------|
 | `--thing <id>` | ○ | 主語 thing |
-| `--from <pred>` | — | 遷移元述語（省略可） |
-| `--to <pred>` | ○ | 遷移先述語 |
+| `--from <pred>` | — | 遷移元述語（省略可＝初期状態への遷移。`forbid-transition` は **from 非空時のみ**照合） |
+| `--to <pred>` | ○ | 遷移先述語（`forbid-state` は to で照合） |
 | `--at <time_id>` | ○ | 発生 time |
 | `--label <text>` | — | 人間向けラベル（例: `育った`） |
 | `--scope plot` | — | デフォルト `plot` |
@@ -356,6 +356,8 @@ action を登録（A5）。
 novel-logic action add --thing momotaro --from 赤ちゃん --to 青年 --at t4 --label 育った
 novel-logic action add --branch branch_dog --thing inu --from 野良 --to 仲間 --at t8 --label 犬のみ仲間
 ```
+
+**time 窓**: `scope=novel:<scene>` の action は scene の `[time_start, time_end]` 内であること（Stage 1 エラー）。`scope=plot`（デフォルト）は窓チェック対象外 — `validate` の `action.plot_scene_hint` で Phase B 整合を促す。
 
 **重複**: 同一 `(thing, from, to, at, scope)` の `add` は拒否（`label` は重複キーに含まない）。変更は `action update <id>`。
 
@@ -377,7 +379,7 @@ rule を登録（プロット設計段階で推奨）。
 | `--kind forbid-transition` | ○* | 遷移禁止: `--from` + `--to` と併用 |
 | `--thing <id>` | △ | `forbid-state` 時必須 |
 | `--pred <text>` | △ | `forbid-state` 時必須 |
-| `--from <pred>` | △ | `forbid-transition` 時必須 |
+| `--from <pred>` | △ | `forbid-transition` 時必須（rule 定義側。action 側の from 省略は初期遷移として許容） |
 | `--to <pred>` | △ | `forbid-transition` 時必須 |
 | `--branch <id>` | — | story branch（デフォルト: `main`） |
 

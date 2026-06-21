@@ -221,6 +221,8 @@ func checkForbidStateRules(rules []project.Rule, thing, pred string) string {
 	return ""
 }
 
+// checkActionRulesFor enforces forbid-state on to and forbid-transition only when from is set
+// (initial-state actions omit from; matches Lean actionRespectsRules).
 func checkActionRulesFor(rules []project.Rule, a project.Action) string {
 	if msg := checkForbidStateRules(rules, a.Thing, a.To); msg != "" {
 		return msg
