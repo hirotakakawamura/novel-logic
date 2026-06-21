@@ -219,9 +219,11 @@ plot を登録または更新する（A1）。
 
 | フラグ | 必須 | 説明 |
 |--------|------|------|
-| `--title <text>` | ○ | 作品タイトル |
-| `--summary <text>` | — | プロット概要 |
-| `--file <path>` | — | 概要テキストファイル（`--summary` の代替） |
+| `--title <text>` | △* | 作品タイトル（`project.yaml`） |
+| `--summary <text>` | △* | プロット概要（`plot.yaml`） |
+| `--file <path>` | △* | 概要テキストファイル（`--summary` の代替） |
+
+\* **`--title` / `--summary` / `--file` のいずれか1つ以上**が必須。新規作品では `--title` を推奨。
 
 ---
 

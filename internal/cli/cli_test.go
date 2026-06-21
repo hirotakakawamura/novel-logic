@@ -44,6 +44,22 @@ func TestPlotSet(t *testing.T) {
 	}
 }
 
+func TestPlotSetFromFile(t *testing.T) {
+	dir := writeCLIProject(t)
+	summaryPath := filepath.Join(dir, "plot-summary.txt")
+	if err := os.WriteFile(summaryPath, []byte("From file"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	_, code := runCLI(t, "-C", dir, "plot", "set", "--file", summaryPath)
+	if code != 0 {
+		t.Fatalf("exit code = %d", code)
+	}
+	out, code := runCLI(t, "-C", dir, "plot", "show")
+	if code != 0 || !strings.Contains(out, "summary: From file") {
+		t.Fatalf("plot show exit %d, output=%q", code, out)
+	}
+}
+
 func TestGenerate(t *testing.T) {
 	dir := writeCLIProject(t)
 	out, code := runCLI(t, "-C", dir, "generate")
