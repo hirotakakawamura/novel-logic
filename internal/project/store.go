@@ -33,6 +33,8 @@ func Load(root string) (*Data, error) {
 	if _, err := os.Stat(filepath.Join(root, FileProject)); err != nil {
 		return nil, fmt.Errorf("not a novel-logic project (missing %s): %w", FileProject, err)
 	}
+	// Optional YAML files are read best-effort; missing paths yield empty slices.
+	// ensureMainBranch adds main when branches.yaml is absent. See doctor recommended_missing.
 	d := &Data{Root: root}
 	if err := readYAML(filepath.Join(root, FileProject), &d.Meta); err != nil {
 		return nil, fmt.Errorf("read %s: %w", FileProject, err)

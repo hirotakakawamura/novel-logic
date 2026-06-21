@@ -3,38 +3,46 @@
   thing: momotaro
   pred: 人間
   scope: plot
+  branch: main
 - id: fact2
   kind: fixed
   thing: ojiisan
   pred: 人間
   scope: plot
+  branch: main
 - id: fact3
   kind: fixed
   thing: obaasan
   pred: 人間
   scope: plot
+  branch: main
 - id: fact4
   kind: fixed
   thing: inu
   pred: 動物
   scope: plot
+  branch: main
 - id: fact5
   kind: fixed
   thing: saru
   pred: 動物
   scope: plot
+  branch: main
 - id: fact6
   kind: fixed
   thing: kiji
   pred: 動物
   scope: plot
+  branch: main
 - id: fact7
   kind: state
   thing: momotaro
   pred: 赤ちゃん
   scope: plot
+  branch: main
 - id: fact8
   kind: state
   thing: momotaro
   pred: 青年
   scope: plot
+  branch: main

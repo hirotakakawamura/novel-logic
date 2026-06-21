@@ -19,3 +19,27 @@ jobs:
 
       - name: Run tests
         run: go test ./...
+
+  lean-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.22"
+          cache: true
+
+      - name: Install elan
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain stable
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Build novel-logic
+        run: go build -o bin/novel-logic ./cmd/novel-logic
+
+      - name: Stage 2 check (momotaro-walkthrough)
+        run: ./bin/novel-logic -C examples/momotaro-walkthrough check -q
+
+      - name: Stage 2 check (momotaro)
+        run: ./bin/novel-logic -C examples/momotaro check -q

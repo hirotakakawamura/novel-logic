@@ -36,6 +36,10 @@ inductive TimeId
   | t13
   deriving DecidableEq, Repr
 
+inductive BranchId
+  | main
+  deriving DecidableEq, Repr
+
 inductive SceneId
   | scene1
   | scene2

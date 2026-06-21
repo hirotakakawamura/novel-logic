@@ -106,16 +106,24 @@ PJ=./examples/momotaro-walkthrough
 
 ## ステータス
 
-- **Phase 0（MVP）**: 完了 — Go CLI、YAML 永続化、branch/fork/merge、Stage 1/2、桃太郎 end-to-end、単体テスト、GitHub Actions CI
-- **Phase 1 予定**: 対話ウィザード、plot ↔ novel 横断の厳格化、Tier 1 定理
+- **Phase 0（MVP）**: 完了 — Go CLI、YAML 永続化、branch/fork/merge、Stage 1/2、桃太郎 end-to-end、単体テスト、GitHub Actions CI（Go test + examples Stage 2）
+- **Phase 1 予定**: 対話ウィザード（`wizard`）、`--json` / `generate --dry-run`、plot ↔ novel 横断の厳格化、Tier 1 定理 — 詳細は [COMMANDS.md §8–§9](docs/COMMANDS.md)
 
 ## テスト・CI
 
 ```bash
-go test ./...    # internal/cli, generate, project, validate
+go test ./...    # internal/cli, generate, project, validate（Lean 不要）
+
+# Stage 2（Lean 要。ローカル確認）
+./bin/novel-logic -C examples/momotaro-walkthrough check -q
 ```
 
-リポジトリの [`.github/workflows/test.yml`](.github/workflows/test.yml) が `push` / `pull_request` で `go test ./...` を実行します（Lean 不要）。作品データの `check`（Stage 2）はローカルまたは別 CI ジョブで実行してください。
+[`.github/workflows/test.yml`](.github/workflows/test.yml) は 2 ジョブを実行します。
+
+| ジョブ | 内容 |
+|--------|------|
+| `test` | `go test ./...` |
+| `lean-check` | elan セットアップ後、`examples/momotaro-walkthrough` と `examples/momotaro` で `check`（Stage 2） |
 
 ## ディレクトリ構成
 
@@ -123,7 +131,7 @@ go test ./...    # internal/cli, generate, project, validate
 novel-logic/
   cmd/novel-logic/         # CLI エントリポイント
   internal/                # ドメイン・検証・Lean 生成
-  .github/workflows/       # CI（go test）
+  .github/workflows/       # CI（go test + lean-check）
   docs/                    # 要件・コマンド仕様
   examples/
     momotaro/              # テンプレート由来の完成サンプル

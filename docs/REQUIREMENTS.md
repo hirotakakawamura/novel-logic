@@ -602,7 +602,7 @@ CLI は §4 の登録フローに対応する操作を提供する。詳細は [
 | **正（メイン）** | サブコマンド型（`novel-logic thing add`, `novel-logic fact add` 等） | 0 |
 | **補助** | 対話型ウィザード（`novel-logic wizard`）— 同じ登録を質問形式で実行 | 1 |
 
-- Phase 0 の MVP・CI・テストは **サブコマンドのみ**で完結させる。
+- Phase 0 の MVP・CI・テストは **サブコマンドのみ**で完結させる（`wizard` / `--json` / `--dry-run` は Phase 1 — [COMMANDS.md §8–§9](COMMANDS.md)）。
 - ウィザードはサブコマンドの薄いラッパとし、登録・矛盾拒否のロジックは共有する。
 - 人手・AI はサブコマンドまたは YAML 直接編集を使う（ウィザード必須ではない）。
 
@@ -634,7 +634,7 @@ CLI は §4 の登録フローに対応する操作を提供する。詳細は [
 - [x] branch / fork / merge + branch 別 Lean 定理（`activeActions_*`）
 - [x] `examples/momotaro/` / `examples/momotaro-walkthrough/`（`branch_dog` 分岐デモ）
 - [x] 単体テスト（`internal/cli`, `generate`, `project`, `validate`）
-- [x] GitHub Actions CI（`go test ./...`）
+- [x] GitHub Actions CI（`go test ./...` + examples の Stage 2 `check`）
 
 ### Phase 1
 
@@ -747,3 +747,4 @@ CLI は §4 の登録フローに対応する操作を提供する。詳細は [
 | 2026-06-21 | Phase 0 完了を反映（branch/fork/merge、Lean branch 定理、テスト、CI） |
 | 2026-06-21 | §7.2–7.3 を `novels/<branch>/` 構成に更新 |
 | 2026-06-21 | 設計判断 #14/#16/#20 確定（plot time 窓は hint のみ、`novel_extends_plot` は Phase 1、空 `from` と forbid-transition） |
+| 2026-06-21 | CI lean-check 追加、COMMANDS §8–§9 に Phase 1 予約を集約、doctor 推奨ファイル |
