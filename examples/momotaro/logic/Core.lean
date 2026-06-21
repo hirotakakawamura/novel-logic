@@ -104,4 +104,10 @@ def allActionsInSceneWindows {τ π ι σ σc : Type}
     (acts : List (ActionDecl τ π ι σ)) (scopeToScene : σ → Option σc) : Bool :=
   acts.all fun a => actionInSceneWindow windows order a scopeToScene
 
+/-- Branch-filtered state evolution: supply the active action list for a story branch. -/
+def evolveBranch {τ π ι σ : Type} [DecidableEq τ] [DecidableEq π] [DecidableEq ι]
+    (fixed : List (FixedFact τ π σ)) (states : List (StateDecl τ π σ))
+    (acts : List (ActionDecl τ π ι σ)) (order : List ι) (t : ι) (thing : τ) : List π :=
+  predsAt fixed states acts order t thing
+
 end NovelLogic

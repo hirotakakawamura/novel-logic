@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"novel-logic/internal/lean"
+	"novel-logic/internal/project"
+	"novel-logic/internal/testfixture"
 )
 
 func TestCheckQuick(t *testing.T) {
@@ -52,6 +54,40 @@ func TestCheckStage2FailsOnBrokenLean(t *testing.T) {
 	_, code := runCLI(t, "-C", dir, "check", "--no-generate")
 	if code != 3 {
 		t.Fatalf("exit %d, want 3 for stage2 failure", code)
+	}
+}
+
+func TestDoctorReportsRecommendedMissing(t *testing.T) {
+	tc := lean.Detect()
+	if !tc.Found {
+		t.Skip("lean/lake not installed")
+	}
+
+	dir := t.TempDir()
+	files := testfixture.MinimalFiles()
+	delete(files, project.FileBranches)
+	delete(files, project.FileForks)
+	delete(files, project.FileMerges)
+	testfixture.WriteFiles(t, dir, files)
+	out, code := runCLI(t, "-C", dir, "doctor")
+	if code != 0 {
+		t.Fatalf("exit %d, want 0 when lean present; output=%q", code, out)
+	}
+	for _, want := range []string{
+		"recommended_missing: branches.yaml",
+		"recommended_missing: forks.yaml",
+		"recommended_missing: merges.yaml",
+	} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("output missing %q: %q", want, out)
+		}
+	}
+	for _, line := range strings.Split(out, "\n") {
+		for _, file := range []string{"branches.yaml", "forks.yaml", "merges.yaml"} {
+			if line == "missing: "+file {
+				t.Fatalf("recommended file reported as missing: %q in %q", file, out)
+			}
+		}
 	}
 }
 

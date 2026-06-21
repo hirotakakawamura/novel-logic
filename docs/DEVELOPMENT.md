@@ -41,7 +41,7 @@ novel-logic は **小説の論理構造を管理し、矛盾を検出する CUI 
 | CLI フレームワーク | [cobra](https://github.com/spf13/cobra) | v1.8 |
 | 永続化 | YAML（[yaml.v3](https://github.com/go-yaml/yaml)） | — |
 | 論理検証 | Lean 4 + lake | ローカル `elan` 推奨 |
-| CI | GitHub Actions | `go test ./...` のみ（Lean 不要） |
+| CI | GitHub Actions | `test`（`go test ./...`）+ `lean-check`（examples Stage 2） |
 
 ---
 
@@ -203,6 +203,8 @@ YAML ファイル群（作品ディレクトリ）
 
 実装: `internal/validate/validate.go`（全体）、`internal/validate/register.go`（登録前）。
 
+**YAML Load**: `project.Load` は `project.yaml` のみ必須。`branches.yaml` / `forks.yaml` / `merges.yaml` 等が無くても空として読み込み、`ensureMainBranch` で `main` を補完。`doctor` はファイル有無を別途報告（必須 / 推奨）。
+
 **hint**（`validate` / `check`、非致命）: `action.plot_scene_hint`（plot action が scene time 内にある場合の Phase B 整合提案）、`novel.revision_hint` 等。`check --quick` では表示しない。
 
 branch 関連の構造化 issue: `project.BranchIssue`（`branch_validate.go`）。文字列パースは使わない。
@@ -247,7 +249,7 @@ go test ./...
 
 # サンプルプロジェクトで end-to-end
 ./bin/novel-logic init ./tmp-momo --template momotaro
-./bin/novel-logic -C ./tmp-momo check --quick    # Stage 1 のみ（CI 同等）
+./bin/novel-logic -C ./tmp-momo check --quick    # Stage 1 のみ（CI test ジョブ相当）
 ./bin/novel-logic -C ./tmp-momo check            # Stage 1 + Lean（要 toolchain）
 
 # ウォークスルー（branch デモ含む）
@@ -305,10 +307,10 @@ git diff internal/generate/testdata/   # 差分を確認してからコミット
 [`.github/workflows/test.yml`](../.github/workflows/test.yml):
 
 - トリガー: `push` / `pull_request` → `main`
-- `go test ./...` のみ（Lean 不要、数分以内）
-- **Stage 2（`check` フル）は CI に含めない**（Lean セットアップコスト・作品データ依存のため）
+- **`test`**: `go test ./...`（Lean 不要）
+- **`lean-check`**: elan インストール → `examples/momotaro-walkthrough` と `examples/momotaro` で `novel-logic check -q`（Stage 2）
 
-PR を出す前にローカルで `go test ./...` を通すこと。Lean 変更時はローカルで `check` も確認する。
+PR を出す前にローカルで `go test ./...` を通すこと。Lean 生成・定理を変えたら `lean-check` 相当の `check` もローカルで確認する。
 
 ---
 
@@ -525,7 +527,7 @@ gh pr merge <番号> --squash --admin --delete-branch
 
 | ルール | 内容 |
 |--------|------|
-| CI | `go test ./...` が green であること（必須チェック） |
+| CI | `test` と `lean-check` が green であること（必須チェック） |
 | 承認 | **1 承認必須**。承認者は **PR 作者と別の GitHub アカウント**（自己承認不可） |
 | スコープ | 1 PR = 1 目的 |
 | docs | 仕様・CLI 変更は **同一 PR** に `docs/` 更新を含める |

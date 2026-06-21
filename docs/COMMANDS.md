@@ -12,6 +12,15 @@
 
 **用語（YAML / CLI）**: ドキュメント上の概念名 `fixed_fact` は、YAML と CLI では **`kind: fixed`** と書く（`state` も同様）。
 
+## ドキュメント構成
+
+| 章 | 内容 | 実装状況 |
+|----|------|----------|
+| **§0–§7** | 共通仕様、登録、検証、生成、桃太郎例 | **Phase 0 実装済み**（本番 CLI） |
+| **§8–§9** | ウィザード、`--json` / `--dry-run` 等の Phase 1 予約 | **未実装**（仕様のみ） |
+
+未実装コマンド・フラグは README のクイックスタートには含めない。
+
 ---
 
 ## 0. 共通仕様
@@ -61,7 +70,7 @@ plot / novel 二層のデータ操作で使う。
 |--------|------|
 | `-q` / `--quiet` | エラー時以外は出力抑制 |
 | `-v` / `--verbose` | 詳細ログ（矛盾チェックの内訳等） |
-| `--json` | 機械可読出力（**Phase 1 予定**。現行実装では未対応） |
+| `--json` | 機械可読出力 — **未実装**（Phase 1 予約。§8–§9） |
 
 ### 0.5 登録拒否時の応答
 
@@ -114,7 +123,16 @@ plot / novel 二層のデータ操作で使う。
 
 ### `novel-logic doctor`
 
-環境診断: 自バイナリ版、`elan` / `lean` / `lake` の PATH、作品必須ファイル、推奨アクション。
+環境診断: 自バイナリ版、`elan` / `lean` / `lake` の PATH、作品 YAML の存在チェック。
+
+| 区分 | ファイル | 欠落時の表示 |
+|------|----------|--------------|
+| **必須** | `project.yaml`, `plot.yaml`, `things.yaml`, `scenes.yaml`, `times.yaml`, `facts.yaml`, `actions.yaml`, `rules.yaml`, `novels.yaml` | `missing: <file>` |
+| **推奨** | `branches.yaml`, `forks.yaml`, `merges.yaml` | `recommended_missing: <file>` |
+
+**Load との差**: `project.Load` は必須は `project.yaml` のみ。上記 YAML が無くても読み込みは成功し、空スライスまたは `main` branch のデフォルトで補完する（[REQUIREMENTS §7.3](REQUIREMENTS.md)）。`doctor` はファイルの有無を報告する診断用。
+
+**終了コード**: 必須・推奨ファイルの欠落は情報表示のみ（§0.3 の `0`）。`elan` / `lean` / `lake` が揃わない場合のみ **終了コード 5**。
 
 ---
 
@@ -558,7 +576,7 @@ novel-logic novel remove <scene_id>    # デフォルト --keep-body
 
 | フラグ | 説明 |
 |--------|------|
-| `--dry-run` | 書き込まず差分プレビュー（**Phase 1 予定**。現行実装では未対応） |
+| `--dry-run` | 書き込まず差分プレビュー — **未実装**（Phase 1 予約。§8–§9） |
 
 ---
 
@@ -674,7 +692,12 @@ novel-logic check
 go test ./...
 ```
 
-GitHub Actions（[`.github/workflows/test.yml`](../.github/workflows/test.yml)）が `push` / `pull_request` で上記を実行します。
+GitHub Actions（[`.github/workflows/test.yml`](../.github/workflows/test.yml)）が `push` / `pull_request` で次の 2 ジョブを実行します。
+
+| ジョブ | 内容 |
+|--------|------|
+| `test` | `go test ./...` |
+| `lean-check` | elan 導入後、`examples/momotaro-walkthrough` と `examples/momotaro` で `check -q`（Stage 2） |
 
 **作品データ**（ユーザーが `init` したディレクトリ）:
 
@@ -684,7 +707,7 @@ novel-logic -C ./momotaro validate --branch main
 novel-logic -C ./momotaro check                 # Stage 1 + Lean 生成 + lake build
 ```
 
-Lean toolchain が CI ランナーに無い場合は `validate` または `check --quick` を使います。
+ローカルで Lean が無い場合は `validate` または `check --quick` を使う。
 
 ---
 
@@ -728,7 +751,7 @@ Phase B（B1–B4）を順に質問。
 - [x] **scene ↔ novel**: branch 内 1:1。本文は `novels/<branch>/<scene>.txt` + git。1:N は Phase 1 で拡張検討
 - [x] **branch / fork / merge**: `branches.yaml` / `forks.yaml` / `merges.yaml` + `--branch` フラグ
 - [x] **単体テスト**: `internal/cli`, `generate`, `project`, `validate`
-- [x] **GitHub Actions**: `go test ./...`（Lean 不要）
+- [x] **GitHub Actions**: `go test ./...` + `lean-check`（examples の Stage 2 `check`）
 - [x] **thing ID**: 作品内一意。`thing add` は新規のみ。スコープ追加は `thing scope add`
 - [x] **add / update 分離**: fact / action / rule / thing の同一キー `add` は拒否
 - [x] **novel revision pin**: git commit を `novels.yaml` に記録
@@ -759,3 +782,4 @@ Phase B（B1–B4）を順に質問。
 | 2026-06-21 | branch/fork/merge、`validate`/`check --branch`、`timeline --branch` を反映 |
 | 2026-06-21 | CI（GitHub Actions）、単体テスト、未実装フラグ（`--json`/`--dry-run`）を明記 |
 | 2026-06-21 | 設計判断 #14/#16/#20: plot time 窓は hint のみ、`novel_extends_plot` は Phase 1、空 `from` と forbid-transition |
+| 2026-06-21 | #17 CI lean-check、#18 §0–7/§8–9 章分け、#22 doctor 推奨ファイルと Load 差の明記 |

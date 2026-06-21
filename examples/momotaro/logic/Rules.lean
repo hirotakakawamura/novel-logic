@@ -5,7 +5,7 @@ namespace Momotaro
 
 open NovelLogic
 
-def projectRules : Rules ThingId PredId := {
+def projectRules_main : Rules ThingId PredId := {
   forbiddenStates := [
     (ThingId.momotaro, PredId.doubutsu),
   ],
@@ -14,5 +14,7 @@ def projectRules : Rules ThingId PredId := {
     (PredId.ningen, PredId.doubutsu),
   ]
 }
+
+abbrev projectRules : Rules ThingId PredId := projectRules_main
 
 end Momotaro

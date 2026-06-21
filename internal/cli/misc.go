@@ -52,10 +52,19 @@ var doctorCmd = &cobra.Command{
 			project.FileProject, project.FilePlot, project.FileThings, project.FileScenes,
 			project.FileTimes, project.FileFacts, project.FileActions, project.FileRules, project.FileNovels,
 		}
+		recommended := []string{
+			project.FileBranches, project.FileForks, project.FileMerges,
+		}
 		for _, f := range required {
 			p := filepath.Join(root, f)
 			if _, err := os.Stat(p); err != nil {
 				fmt.Printf("missing: %s\n", f)
+			}
+		}
+		for _, f := range recommended {
+			p := filepath.Join(root, f)
+			if _, err := os.Stat(p); err != nil {
+				fmt.Printf("recommended_missing: %s\n", f)
 			}
 		}
 		if !tc.Found {
